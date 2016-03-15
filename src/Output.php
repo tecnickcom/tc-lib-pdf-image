@@ -6,7 +6,7 @@
  * @category    Library
  * @package     PdfImage
  * @author      Nicola Asuni <info@tecnick.com>
- * @copyright   2011-2015 Nicola Asuni - Tecnick.com LTD
+ * @copyright   2011-2016 Nicola Asuni - Tecnick.com LTD
  * @license     http://www.gnu.org/copyleft/lesser.html GNU-LGPL v3 (see LICENSE.TXT)
  * @link        https://github.com/tecnickcom/tc-lib-pdf-image
  *
@@ -29,29 +29,14 @@ use \Com\Tecnick\Pdf\Image\Exception as ImageException;
  * @license     http://www.gnu.org/copyleft/lesser.html GNU-LGPL v3 (see LICENSE.TXT)
  * @link        https://github.com/tecnickcom/tc-lib-pdf-image
  */
-class Output
+abstract class Output
 {
     /**
-     * Array of imported images data
-     * iid => (iid, key, x, y, width, height, altimgs)
+     * Current PDF object number
      *
-     * @var array
+     * @var int
      */
-    protected $images;
-
-    /**
-     * PDF string block to return containing the image definitions
-     *
-     * @var string
-     */
-    protected $out = '';
-
-    /**
-     * True if we are in PDF/A mode.
-     *
-     * @var bool
-     */
-    protected $pdfa = false;
+    protected $pon;
 
     /**
      * Unit of measure conversion ratio
@@ -61,20 +46,6 @@ class Output
     protected $kunit = 1.0;
 
     /**
-     * Current PDF object number
-     *
-     * @var int
-     */
-    protected $pon;
-
-    /**
-     * Import object that contains the imported images data.
-     *
-     * @var Import
-     */
-    protected $imp;
-
-    /**
      * Encrypt object
      *
      * @var Encrypt
@@ -82,25 +53,26 @@ class Output
     protected $enc;
 
     /**
+     * True if we are in PDF/A mode.
+     *
+     * @var bool
+     */
+    protected $pdfa = false;
+
+    /**
      * Initialize images data
      *
-     * @param array   $images Array of imported images data
      * @param int     $pon    Current PDF Object Number
      * @param float   $kunit  Unit of measure conversion ratio.
-     * @param Import  $imp    Import object that contains the imported images data.
      * @param Encrypt $enc    Encrypt object
      * @param bool    $pdfa   True if we are in PDF/A mode.
      */
-    public function __construct(array $images, $pon, $kunit, Import $imp, Encrypt $enc, $pdfa = false)
+    public function __construct($pon, $kunit, Encrypt $enc, $pdfa = false)
     {
-        $this->images = $images;
         $this->pon = (int) $pon;
         $this->kunit = (float) $kunit;
-        $this->imp = $imp;
         $this->enc = $enc;
         $this->pdfa = (bool) $pdfa;
-
-        $this->out = $this->getOutput();
     }
 
     /**
@@ -114,34 +86,28 @@ class Output
     }
 
     /**
-     * Returns the PDF images block
-     *
-     * @return string
-     */
-    public function getImagesBlock()
-    {
-        return $this->out;
-    }
-
-    /**
      * Get the PDF output string for Images
      *
      * @return string
      */
-    protected function getOutput()
+    protected function getOutImagesBlock()
     {
-        $this->out = '';
-        foreach ($this->images as $iid => $img) {
-            if (!empty($this->imp[$img['key']]['mask'])) {
-                $this->out .= $this->getImage($img, $this->imp[$img['key']]['mask'], 'mask');
+        $out = '';
+        foreach ($this->image as $iid => $img) {
+            if (empty($this->cache[$img['key']]['out'])) {
+                if (!empty($this->cache[$img['key']]['mask'])) {
+                    $out .= $this->getOutImage($img, $this->cache[$img['key']]['mask'], 'mask');
+                    if (!empty($this->cache[$img['key']]['plain'])) {
+                        $out .= $this->getOutImage($img, $this->cache[$img['key']]['plain'], 'plain');
+                    }
+                } else {
+                    $out .= $this->getOutImage($img, $this->cache[$img['key']]);
+                }
+                $this->cache[$img['key']]['out'] = true; // mark it as done
+                $this->image[$iid] = $img;
             }
-            if (!empty($this->imp[$img['key']]['plain'])) {
-                $this->out .= $this->getImage($img, $this->imp[$img['key']]['plain'], 'plain');
-            } else {
-                $this->out .= $this->getImage($img, $this->imp[$img['key']]);
-            }
-            $this->images[$iid] = $img;
         }
+        return $out;
     }
 
     /**
@@ -153,7 +119,7 @@ class Output
      *
      * @return string
      */
-    protected function getIcc(&$img, $data, $sub = '')
+    protected function getOutIcc(&$img, $data, $sub = '')
     {
         if (empty($data['icc'])) {
             return '';
@@ -182,7 +148,7 @@ class Output
      *
      * @return string
      */
-    protected function getPalette(&$img, $data, $sub = '')
+    protected function getOutPalette(&$img, $data, $sub = '')
     {
         if ($data['colspace'] != 'Indexed') {
             return '';
@@ -208,7 +174,7 @@ class Output
      *
      * @return string
      */
-    protected function getAltImages(&$img, $sub = '')
+    protected function getOutAltImages(&$img, $sub = '')
     {
         if ($this->pdfa || empty($img['altimgs'])) {
             return '';
@@ -219,10 +185,10 @@ class Output
         $out = $this->pon.' 0 obj'."\n"
             .'[';
         foreach ($img['altimgs'] as $alt) {
-            if (!empty($this->images[$alt][$sub.'obj'])) {
+            if (!empty($this->image[$alt][$sub.'obj'])) {
                 $out .= ' <<'
-                    .' /Image '.$this->images[$alt][$sub.'obj'].' 0 R'
-                    .' /DefaultForPrinting '.(empty($this->imp[$alt]['defprint']) ? 'false' : 'true')
+                    .' /Image '.$this->image[$alt][$sub.'obj'].' 0 R'
+                    .' /DefaultForPrinting '.(empty($this->image[$alt]['defprint']) ? 'false' : 'true')
                     .' >>';
             }
 
@@ -242,11 +208,11 @@ class Output
      *
      * @return string
      */
-    protected function getImage(&$img, $data, $sub = '')
+    protected function getOutImage(&$img, $data, $sub = '')
     {
-        $out = $this->getIcc($img, $data, $sub)
-                .$this->getPalette($img, $data, $sub)
-                .$this->getAltImages($img, $sub);
+        $out = $this->getOutIcc($img, $data, $sub)
+                .$this->getOutPalette($img, $data, $sub)
+                .$this->getOutAltImages($img, $sub);
 
         $img[$sub.'obj'] = ++$this->pon;
 
@@ -255,7 +221,7 @@ class Output
             .' /Subtype /Image'
             .' /Width '.$data['width']
             .' /Height '.$data['height']
-            .$this->getColorInfo($img, $data, $sub);
+            .$this->getOutColorInfo($img, $data, $sub);
 
         if (!empty($data['exturl'])) {
             // external stream
@@ -276,7 +242,7 @@ class Output
 
             // Colour Key Masking
             if (!empty($data['trns'])) {
-                $trns = $this->getTransparency($data);
+                $trns = $this->getOutTransparency($data);
                 if (!empty($trns)) {
                     $out .= ' /Mask [ '.$trns.']';
                 }
@@ -303,7 +269,7 @@ class Output
      *
      * @return string
      */
-    protected function getColorInfo($img, $data, $sub = '')
+    protected function getOutColorInfo($img, $data, $sub = '')
     {
         $out = '';
         // set color space
@@ -342,7 +308,7 @@ class Output
      *
      * @return string
      */
-    protected function getTransparency($data)
+    protected function getOutTransparency($data)
     {
         $trns = '';
 

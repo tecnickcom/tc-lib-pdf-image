@@ -32,14 +32,30 @@ use \Com\Tecnick\Pdf\Image\Exception as ImageException;
  * @license     http://www.gnu.org/copyleft/lesser.html GNU-LGPL v3 (see LICENSE.TXT)
  * @link        https://github.com/tecnickcom/tc-lib-pdf-image
  */
-class Import
+class Import extends \Com\Tecnick\Pdf\Image\Output
 {
     /**
-     * Cache used to store imported image data
+     * Image index.
+     * Count the number of added images.
+     *
+     * @var int
+     */
+    protected $iid = 0;
+    
+    /**
+     * Stack of added images.
      *
      * @var array
      */
-    protected static $cache = array();
+    protected $image = array();
+
+    /**
+     * Cache used to store imported image data.
+     * The same image data can be reused multiple times.
+     *
+     * @var array
+     */
+    protected $cache = array();
 
     /**
      * Native image types and associated importing class
@@ -83,6 +99,43 @@ class Import
     );
 
     /**
+     * Add a new image
+     *
+     * @param string $image    Image file name, URL or a '@' character followed by the image data string.
+     *                         To link an image without embedding it on the document, set an asterisk character
+     *                         before the URL (i.e.: '*http://www.example.com/image.jpg').
+     * @param int    $width    New width in pixels or null to keep the original value
+     * @param int    $height   New height in pixels or null to keep the original value
+     * @param bool   $ismask   True if the image is a transparency mask
+     * @param int    $quality  Quality for JPEG files (0 = max compression; 100 = best quality, bigger file).
+     * @param bool   $defprint Indicate if the image is the default for printing when used as alternative image.
+     * @param bool   $hidden   True to not display this image (used for alternate images).
+     * @param array  $altimgs  Arrays of alternate image keys.
+     *
+     * @return array Image raw data array
+     */
+    public function add(
+        $image,
+        $width = null,
+        $height = null,
+        $ismask = false,
+        $quality = 100,
+        $defprint = false,
+        $altimgs = array()
+    ) {
+        $data = $this->import($image, $width, $height, $ismask, $quality, $defprint);
+        $this->image[$this->iid] = array(
+            'iid'      => $this->iid,
+            'key'      => $data['key'],
+            'width'    => $data['width'],
+            'height'   => $data['height'],
+            'defprint' => $defprint,
+            'altimgs'  => $altimgs,
+        );
+        ++$this->iid;
+    }
+
+    /**
      * Get the original image raw data
      *
      * @param string $image    Image file name, URL or a '@' character followed by the image data string.
@@ -90,24 +143,22 @@ class Import
      *                         before the URL (i.e.: '*http://www.example.com/image.jpg').
      * @param int    $width    New width in pixels or null to keep the original value
      * @param int    $height   New height in pixels or null to keep the original value
+     * @param bool   $ismask   True if the image is a transparency mask
      * @param int    $quality  Quality for JPEG files (0 = max compression; 100 = best quality, bigger file).
-     * @param bool   $defprint Indicate if the image is the default for printing. when used as alternative image.
      *
      * @return array Image raw data array
      */
-    public function import($image, $width = null, $height = null, $quality = 100, $defprint = false)
+    protected function import($image, $width = null, $height = null, $ismask = false, $quality = 100)
     {
         $quality = max(0, min(100, $quality));
         $imgkey = $this->getKey($image, intval($width), intval($height), $quality);
 
-        if (isset(self::$cache[$imgkey])) {
-            // retrieve cached data
-            return self::$cache[$imgkey];
+        if (isset($this->cache[$imgkey])) {
+            return $this->cache[$imgkey];
         }
 
         $data = $this->getRawData($image);
         $data['key'] = $imgkey;
-        $data['defprint'] = $defprint;
 
         if ($width = null) {
             $width = $data['width'];
@@ -121,15 +172,8 @@ class Import
         if ((!$data['native']) || ($width != $data['width']) || ($height != $data['height'])) {
             $data = $this->getResizedRawData($data, $width, $height, true, $quality);
         }
-        $class = self::native[$data['type']];
-        $imp = new $class();
-        $data = $imp->getData($data);
 
-        if (!empty($data['recode'])) {
-            // re-encode the image as it was not possible to decode it
-            $data = $this->getResizedRawData($data, $width, $height, true, $quality);
-            $data = $imp->getData($data);
-        }
+        $data = $this->getData($data, $width, $height, $quality);
 
         if (!empty($data['splitalpha'])) {
             // create 2 separate images: plain + mask
@@ -137,10 +181,12 @@ class Import
             $data['plain'] = $imp->getData($data['plain']);
             $data['mask'] = $this->getAlphaChannelRawData($data);
             $data['mask'] = $imp->getData($data['alpha']);
+        } elseif ($ismask) {
+            $data['mask'] = $data;
         }
 
         // store data in cache
-        self::$cache[$imgkey] = $data;
+        $this->cache[$imgkey] = $data;
 
         return $data;
     }
@@ -176,12 +222,36 @@ class Import
      *
      * @return array Image raw data array
      */
-    public function getImageByKey($key)
+    public function getImageDataByKey($key)
     {
-        if (empty(self::$cache[$key])) {
+        if (empty($this->cache[$key])) {
             throw new ImageException('Unknown key');
         }
-        return self::$cache[$key];
+        return $this->cache[$key];
+    }
+
+    /**
+     * Extract the relevant data from the image
+     *
+     * @param string $data Image raw data
+     * @param int    $width   Width in pixels
+     * @param int    $height  Height in pixels
+     * @param int    $quality Quality for JPEG files
+     *
+     * @return string
+     */
+    public function getKData($data, $width, $height, $quality)
+    {
+        $class = self::native[$data['type']];
+        $imp = new $class();
+        $data = $imp->getData($data);
+
+        if (!empty($data['recode'])) {
+            // re-encode the image as it was not possible to decode it
+            $data = $this->getResizedRawData($data, $width, $height, true, $quality);
+            $data = $imp->getData($data);
+        }
+        return $data;
     }
 
     /**
@@ -216,6 +286,7 @@ class Import
             'pal'      => '',            // colour palette
             'trns'     => array(),       // colour key masking
             'data'     => '',            // PDF image data
+            'ismask'   => false,         // true if the image is a transparency mask
         );
 
         if (empty($image)) {
