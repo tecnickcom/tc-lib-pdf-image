@@ -13,14 +13,14 @@
  * This file is part of tc-lib-pdf-image software library.
  */
 
-namespace Com\Tecnick\Pdf\Image;
+namespace Com\Tecnick\Pdf\Image\Import;
 
 use \Com\Tecnick\File\File;
 use \Com\Tecnick\File\Byte;
 use \Com\Tecnick\Pdf\Image\Exception as ImageException;
 
 /**
- * Com\Tecnick\Pdf\Image\Jpeg
+ * Com\Tecnick\Pdf\Image\Import\Jpeg
  *
  * @since       2011-05-23
  * @category    Library

@@ -17,8 +17,8 @@ namespace Com\Tecnick\Pdf\Image;
 
 use \Com\Tecnick\File\File;
 use \Com\Tecnick\File\Byte;
-use \Com\Tecnick\Pdf\Image\Jpeg;
-use \Com\Tecnick\Pdf\Image\Png;
+use \Com\Tecnick\Pdf\Image\Import\Jpeg;
+use \Com\Tecnick\Pdf\Image\Import\Png;
 use \Com\Tecnick\Pdf\Image\Exception as ImageException;
 
 /**
@@ -112,7 +112,7 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
      * @param bool   $hidden   True to not display this image (used for alternate images).
      * @param array  $altimgs  Arrays of alternate image keys.
      *
-     * @return array Image raw data array
+     * @return int Image ID
      */
     public function add(
         $image,
@@ -124,6 +124,7 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
         $altimgs = array()
     ) {
         $data = $this->import($image, $width, $height, $ismask, $quality, $defprint);
+        ++$this->iid;
         $this->image[$this->iid] = array(
             'iid'      => $this->iid,
             'key'      => $data['key'],
@@ -132,7 +133,7 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
             'defprint' => $defprint,
             'altimgs'  => $altimgs,
         );
-        ++$this->iid;
+        return $this->iid;
     }
 
     /**
@@ -145,7 +146,7 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
      *
      * @return string
      */
-    public function getKey($image, $width, $height, $quality)
+    public function getKey($image, $width = 0, $height = 0, $quality = 100)
     {
         return strtr(
             rtrim(
@@ -199,11 +200,11 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
         $data = $this->getRawData($image);
         $data['key'] = $imgkey;
 
-        if ($width = null) {
+        if ($width === null) {
             $width = $data['width'];
         }
         $width = max(0, intval($width));
-        if ($height = null) {
+        if ($height === null) {
             $height = $data['height'];
         }
         $height = max(0, intval($height));
@@ -214,14 +215,14 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
 
         $data = $this->getData($data, $width, $height, $quality);
 
-        if (!empty($data['splitalpha'])) {
+        if ($ismask) {
+            $data['mask'] = $data;
+        } elseif (!empty($data['splitalpha'])) {
             // create 2 separate images: plain + mask
             $data['plain'] = $this->getResizedRawData($data, $width, $height, false, $quality);
-            $data['plain'] = $imp->getData($data['plain']);
+            $data['plain'] = $this->getData($data['plain'], $width, $height, $quality);
             $data['mask'] = $this->getAlphaChannelRawData($data);
-            $data['mask'] = $imp->getData($data['alpha']);
-        } elseif ($ismask) {
-            $data['mask'] = $data;
+            $data['mask'] = $this->getData($data['mask'], $width, $height, $quality);
         }
 
         // store data in cache
@@ -242,7 +243,7 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
      */
     protected function getData($data, $width, $height, $quality)
     {
-        $class = self::native[$data['type']];
+        $class = '\\Com\\Tecnick\\Pdf\\Image\\Import\\'.self::$native[$data['type']];
         $imp = new $class();
         $data = $imp->getData($data);
 
@@ -290,7 +291,7 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
         );
 
         if (empty($image)) {
-            return $data;
+            throw new ImageException('Empty image');
         }
 
         if ($image[0] === '@') { // image from string
@@ -317,10 +318,11 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
      */
     protected function getMetaData($data)
     {
-        if (empty($data['raw'])) {
-            return $data;
+        try {
+            $meta = getimagesizefromstring($data['raw']);
+        } catch (\Exception $exc) {
+            throw new ImageException('Invalid image format: '.$exc);
         }
-        $meta = getimagesizefromstring($data['raw']);
         $data['width'] = $meta[0];
         $data['height'] = $meta[1];
         $data['type'] = $meta[2];

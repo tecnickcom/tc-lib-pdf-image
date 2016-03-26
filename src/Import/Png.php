@@ -13,14 +13,14 @@
  * This file is part of tc-lib-pdf-image software library.
  */
 
-namespace Com\Tecnick\Pdf\Image;
+namespace Com\Tecnick\Pdf\Image\Import;
 
 use \Com\Tecnick\File\File;
 use \Com\Tecnick\File\Byte;
 use \Com\Tecnick\Pdf\Image\Exception as ImageException;
 
 /**
- * Com\Tecnick\Pdf\Image\Png
+ * Com\Tecnick\Pdf\Image\Import\Png
  *
  * @since       2011-05-23
  * @category    Library
@@ -101,6 +101,7 @@ class Png
         if (substr($data['raw'], $offset, 4) != 'IHDR') {
             throw new ImageException('Invalid PNG image');
         }
+        $offset += 4;
         $data['width'] = $byte->getULong($offset);
         $offset += 4;
         $data['height'] = $byte->getULong($offset);
@@ -147,7 +148,7 @@ class Png
             } elseif ($type == 'IDAT') {
                 $data = $this->getIdatChunk($data, $offset, $len);
             } elseif ($type == 'iCCP') {
-                $data = $this->getIccpChunk($data, $offset, $len);
+                $data = $this->getIccpChunk($byte, $data, $offset, $len);
             } elseif ($type == 'IEND') {
                 // The image trailer chunk (IEND) must be the final chunk
                 // and marks the end of the PNG file or data stream.
@@ -205,7 +206,8 @@ class Png
             $data['trns'][] = ord($trns[1]);
             $data['trns'][] = ord($trns[3]);
             $data['trns'][] = ord($trns[5]);
-        } else { // Indexed
+        } else {
+            // Indexed
             $data['trns'] = array_map('ord', str_split($trns));
         }
         $offset += 4;
@@ -235,13 +237,14 @@ class Png
     /**
      * Extract the iCCP chunk data
      *
+     * @param Byte   $byte   Byte class object
      * @param string $data   Image raw data
      * @param int    $offset Current byte offset
      * @param int    $len    NUmber of bytes in this chunk
      *
      * @return array Image raw data array
      */
-    protected function getIccpChunk($data, &$offset, $len)
+    protected function getIccpChunk($byte, $data, &$offset, $len)
     {
         // skip profile name
         $pos = 0;
