@@ -136,7 +136,46 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
     }
 
     /**
-     * Get the original image raw data
+     * Get the Image key used for caching
+     *
+     * @param string $image   Image file name or content
+     * @param int    $width   Width in pixels
+     * @param int    $height  Height in pixels
+     * @param int    $quality Quality for JPEG files
+     *
+     * @return string
+     */
+    public function getKey($image, $width, $height, $quality)
+    {
+        return strtr(
+            rtrim(
+                base64_encode(
+                    pack('H*', md5($image.$width.$height.$quality))
+                ),
+                '='
+            ),
+            '+/',
+            '-_'
+        );
+    }
+
+    /**
+     * Get an imported image by key
+     *
+     * @param string $key Image key
+     *
+     * @return array Image raw data array
+     */
+    public function getImageDataByKey($key)
+    {
+        if (empty($this->cache[$key])) {
+            throw new ImageException('Unknown key');
+        }
+        return $this->cache[$key];
+    }
+
+    /**
+     * Import the original image raw data
      *
      * @param string $image    Image file name, URL or a '@' character followed by the image data string.
      *                         To link an image without embedding it on the document, set an asterisk character
@@ -192,45 +231,6 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
     }
 
     /**
-     * Get the Image key used for caching
-     *
-     * @param string $image   Image file name or content
-     * @param int    $width   Width in pixels
-     * @param int    $height  Height in pixels
-     * @param int    $quality Quality for JPEG files
-     *
-     * @return string
-     */
-    public function getKey($image, $width, $height, $quality)
-    {
-        return strtr(
-            rtrim(
-                base64_encode(
-                    pack('H*', md5($image.$width.$height.$quality))
-                ),
-                '='
-            ),
-            '+/',
-            '-_'
-        );
-    }
-
-    /**
-     * Get an imported image by key
-     *
-     * @param string $key Image key
-     *
-     * @return array Image raw data array
-     */
-    public function getImageDataByKey($key)
-    {
-        if (empty($this->cache[$key])) {
-            throw new ImageException('Unknown key');
-        }
-        return $this->cache[$key];
-    }
-
-    /**
      * Extract the relevant data from the image
      *
      * @param string $data Image raw data
@@ -240,7 +240,7 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
      *
      * @return string
      */
-    public function getKData($data, $width, $height, $quality)
+    protected function getData($data, $width, $height, $quality)
     {
         $class = self::native[$data['type']];
         $imp = new $class();

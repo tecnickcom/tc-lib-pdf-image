@@ -60,11 +60,18 @@ abstract class Output
     protected $pdfa = false;
 
     /**
+     * Store image object IDs for the XObject Dctionary.
+     *
+     * @var array
+     */
+    protected $xobjdict = array();
+
+    /**
      * Initialize images data
      *
      * @param int     $pon    Current PDF Object Number
      * @param float   $kunit  Unit of measure conversion ratio.
-     * @param Encrypt $enc    Encrypt object
+     * @param Encrypt $enc    Encrypt object.
      * @param bool    $pdfa   True if we are in PDF/A mode.
      */
     public function __construct($pon, $kunit, Encrypt $enc, $pdfa = false)
@@ -86,11 +93,45 @@ abstract class Output
     }
 
     /**
+     * Get the PDF output string to print the specified image ID
+     *
+     * @param int $iid        Image ID
+     * @param int $xpos       Abscissa (X coordinate) of the upper-left Image corner
+     * @param int $ypos       Ordinate (Y coordinate) of the upper-left Image corner
+     * @param int $width      Image width in user units
+     * @param int $height     Image height in user units
+     * @param int $pageheight Page height in user units
+     *
+     * @return string
+     */
+    public function getSetImage($iid, $xpos, $ypos, $width, $height, $pageheight)
+    {
+        $out = 'q';
+        $out .= sprintf(
+            '%F 0 0 %F %F %F cm',
+            ($width * $this->kunit),
+            ($height * $this->kunit),
+            ($xpos * $this->kunit),
+            (($pageheight - $ypos - $height) * $this->kunit) // reverse coordinate
+        );
+        if (!empty($this->image[$iid]['mask'])) {
+            $out .= ' /IMGmask'.$iid.' Do';
+            if (!empty($this->image[$iid]['plain'])) {
+                $out .= ' /IMGplain'.$iid.' Do';
+            }
+        } else {
+            $out .= ' /IMG'.$iid.' Do';
+        }
+        $out .= ' Q';
+        return $out;
+    }
+
+    /**
      * Get the PDF output string for Images
      *
      * @return string
      */
-    protected function getOutImagesBlock()
+    public function getOutImagesBlock()
     {
         $out = '';
         foreach ($this->image as $iid => $img) {
@@ -106,6 +147,19 @@ abstract class Output
                 $this->cache[$img['key']]['out'] = true; // mark it as done
                 $this->image[$iid] = $img;
             }
+        }
+        return $out;
+    }
+    /**
+    * Return XObjects Dictionary portion for the images
+    *
+    * @return string
+    */
+    public function getXobjectDict()
+    {
+        $out = '';
+        foreach ($this->xobjdict as $iid => $objid) {
+            $out .= ' /'.$iid.' '.$objid.' 0 R';
         }
         return $out;
     }
@@ -215,6 +269,7 @@ abstract class Output
                 .$this->getOutAltImages($img, $sub);
 
         $img[$sub.'obj'] = ++$this->pon;
+        $this->xobjdict['IMG'.$sub.$img['iid']] = $this->pon;
 
         $out .= $this->pon.' 0 obj'."\n"
             .'<</Type /XObject'
