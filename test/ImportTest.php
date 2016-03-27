@@ -211,13 +211,13 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         );
 
         $out = $this->obj->getOutImagesBlock();
-        $this->assertEquals('8080e586c7783aa08e44314f602d2895', md5($out));
+        $this->assertEquals('7cc0f7f47f7f317491be42bf0ad960c9', md5($out));
 
         $xob = $this->obj->getXobjectDict();
         $this->assertEquals(
-            ' /IMG1 11 0 R /IMG2 12 0 R /IMG3 13 0 R /IMG4 15 0 R /IMG5 17 0 R /IMG6 18 0 R /IMG7 11 0 R'
-            .' /IMG8 21 0 R /IMG9 23 0 R /IMG10 24 0 R /IMG11 25 0 R /IMG12 26 0 R /IMG13 28 0 R /IMG14 30 0 R'
-            .' /IMG15 32 0 R /IMG16 34 0 R /IMG17 36 0 R',
+            ' /IMG1 11 0 R /IMG2 12 0 R /IMG3 13 0 R /IMG4 15 0 R /IMG5 17 0 R /IMG6 18 0 R /IMG7 11 0 R '
+            .'/IMG8 21 0 R /IMG9 23 0 R /IMG10 24 0 R /IMG11 25 0 R /IMG12 26 0 R /IMG13 28 0 R /IMG14 30 0 R '
+            .'/IMG15 32 0 R /IMG16 34 0 R /IMG17 36 0 R',
             $xob
         );
 

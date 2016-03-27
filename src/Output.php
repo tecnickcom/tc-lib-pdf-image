@@ -320,8 +320,8 @@ abstract class Output
         }
         $out .= ' /BitsPerComponent '.$data['bits'];
         
-        if (!empty($data['maskobj'])) {
-            $out .= ' /SMask '.$data['maskobj'].' 0 R';
+        if (!empty($this->cache[$data['key']]['mask']['obj'])) {
+            $out .= ' /SMask '.$this->cache[$data['key']]['mask']['obj'].' 0 R';
         }
         
         if (!empty($data['obj_alt'])) {
@@ -374,7 +374,6 @@ abstract class Output
     protected function getOutTransparency($data)
     {
         $trns = '';
-
         if ($data['colspace'] != 'Indexed') {
             // grayscale or RGB
             foreach ($data['trns'] as $idx => $val) {
