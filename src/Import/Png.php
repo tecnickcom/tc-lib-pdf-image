@@ -47,7 +47,9 @@ class Png
         $offset = 0;
         // check signature
         if (substr($data['raw'], $offset, 8) != chr(137).'PNG'.chr(13).chr(10).chr(26).chr(10)) {
+            // @codeCoverageIgnoreStart
             throw new ImageException('Not a PNG image');
+            // @codeCoverageIgnoreEnd
         }
         $offset += 8;
         $offset += 4;
@@ -61,7 +63,9 @@ class Png
         ) {
             if (!empty($data['recoded'])) {
                 // this image has been already re-encoded
+                // @codeCoverageIgnoreStart
                 throw new ImageException('Unsupported feature');
+                // @codeCoverageIgnoreEnd
             }
             // re-encode PNG
             $data['recode'] = true;
@@ -99,7 +103,9 @@ class Png
     {
         $byte = new Byte($data['raw']);
         if (substr($data['raw'], $offset, 4) != 'IHDR') {
+            // @codeCoverageIgnoreStart
             throw new ImageException('Invalid PNG image');
+            // @codeCoverageIgnoreEnd
         }
         $offset += 4;
         $data['width'] = $byte->getULong($offset);
@@ -121,7 +127,9 @@ class Png
         if (isset($chcmap[$chc])) {
             $data['colspace'] = $chcmap[$chc];
         } else {
+            // @codeCoverageIgnoreStart
             throw new ImageException('Unknown color mode');
+            // @codeCoverageIgnoreEnd
         }
         return $data;
     }
@@ -137,7 +145,7 @@ class Png
     protected function getChunks($data, $offset)
     {
         $byte = new Byte($data['raw']);
-        while (($len = $byte->getULong($offset)) > 0) {
+        while (($len = $byte->getULong($offset)) >= 0) {
             $offset += 4;
             $type = substr($data['raw'], $offset, 4);
             $offset += 4;
@@ -159,7 +167,9 @@ class Png
             }
         }
         if (($data['colspace'] == 'Indexed') && (empty($data['pal']))) {
+            // @codeCoverageIgnoreStart
             throw new ImageException('The color palette is missing');
+            // @codeCoverageIgnoreEnd
         }
         return $data;
     }
@@ -253,7 +263,9 @@ class Png
         }
         // get compression method
         if ($byte->getByte($offset++) != 0) {
+            // @codeCoverageIgnoreStart
             throw new ImageException('Unknown filter method');
+            // @codeCoverageIgnoreEnd
         }
         // read ICC Color Profile
         $len -= ($pos + 2);
