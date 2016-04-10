@@ -12,7 +12,7 @@
 # ----------------------------------------------------------------------------------------------------------------------
 
 # List special make targets that are not associated with files
-.PHONY: help all test docs phpcs phpcs_test phpcbf phpcbf_test phpmd phpmd_test phpcpd phploc phpdep phpcmpinfo report qa qa_test qa_all clean build build_dev update server install uninstall rpm deb bz2
+.PHONY: help all test docs phpcs phpcs_test phpcbf phpcbf_test phpmd phpmd_test phpcpd phploc phpdep phpcmpinfo report qa qa_test qa_all clean build build_dev update install uninstall rpm deb bz2
 
 # Project owner
 OWNER=tecnickcom
@@ -123,6 +123,7 @@ all: help
 
 # run the PHPUnit tests
 test:
+	@mkdir -p ./target/
 	nohup $(shell which php) -d always_populate_raw_post_data=-1 -t test/images -S localhost:$(PORT) > target/server.log 2>&1 & echo $$! > target/server.pid
 	./vendor/bin/phpunit test ; echo $$? > target/phpunit.exit; kill -9 `cat target/server.pid` ; exit `cat target/phpunit.exit`
 
