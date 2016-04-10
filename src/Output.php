@@ -374,29 +374,11 @@ abstract class Output
     protected function getOutTransparency($data)
     {
         $trns = '';
-        if ($data['colspace'] != 'Indexed') {
-            // grayscale or RGB
-            foreach ($data['trns'] as $idx => $val) {
-                if ($val == 0) {
-                    $trns .= $idx.' '.$idx.' ';
-                }
-            }
-            return $trns;
-        }
-
-        // Indexed
-        $maxval = (pow(2, $data['bits']) - 1);
         foreach ($data['trns'] as $idx => $val) {
-            if (($val != 0) && ($val != $maxval)) {
-                // this is not a binary type mask @TODO: create a SMask
-                $trns = '';
-                break;
-            } elseif (empty($trns) && ($val == 0)) {
-                // store the first fully transparent value
+            if ($val == 0) {
                 $trns .= $idx.' '.$idx.' ';
             }
         }
-
         return $trns;
     }
 }

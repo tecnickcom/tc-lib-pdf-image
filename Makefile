@@ -110,8 +110,6 @@ help:
 	@echo "    make build_dev   : Clean and download the composer dependencies including dev ones"
 	@echo "    make update      : Update composer dependencies"
 	@echo ""
-	@echo "    make server      : Run the example server at http://localhost:"$(PORT)
-	@echo ""
 	@echo "    make install     : Install this library"
 	@echo "    make uninstall   : Remove all installed files"
 	@echo ""
@@ -125,7 +123,8 @@ all: help
 
 # run the PHPUnit tests
 test:
-	./vendor/bin/phpunit test
+	nohup $(shell which php) -d always_populate_raw_post_data=-1 -t test/images -S localhost:$(PORT) > target/server.log 2>&1 & echo $$! > target/server.pid
+	./vendor/bin/phpunit test ; echo $$? > target/phpunit.exit; kill -9 `cat target/server.pid` ; exit `cat target/phpunit.exit`
 
 # generate docs
 docs:
@@ -201,10 +200,6 @@ build_dev:
 # update composer dependencies
 update:
 	($(COMPOSER) update --no-interaction)
-
-# Run the development server
-server:
-	php -t example -S localhost:$(PORT)
 
 # Install this application
 install: uninstall

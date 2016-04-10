@@ -197,6 +197,19 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             'q 150.000000 0 0 75.000000 2.250000 371.250000 cm /IMGmask16 Do /IMGplain16 Do Q',
             $this->obj->getSetImage($iid, 3, 5, 200, 100, 600)
         );
+        
+
+        $iid = $this->obj->add(__DIR__.'/images/200x100_CMYK.jpg');
+        $this->assertEquals(
+            'q 150.000000 0 0 75.000000 2.250000 371.250000 cm /IMG17 Do Q',
+            $this->obj->getSetImage($iid, 3, 5, 200, 100, 600)
+        );
+
+        $iid = $this->obj->add('*http://localhost:8000/200x100_INDEX16.png');
+        $this->assertEquals(
+            'q 150.000000 0 0 75.000000 2.250000 371.250000 cm /IMG18 Do Q',
+            $this->obj->getSetImage($iid, 3, 5, 200, 100, 600)
+        );
 
         // check key
 
@@ -206,18 +219,18 @@ class ImportTest extends \PHPUnit_Framework_TestCase
 
         $iid = $this->obj->add('@'.$data['raw']);
         $this->assertEquals(
-            'q 150.000000 0 0 75.000000 2.250000 371.250000 cm /IMG17 Do Q',
+            'q 150.000000 0 0 75.000000 2.250000 371.250000 cm /IMG19 Do Q',
             $this->obj->getSetImage($iid, 3, 5, 200, 100, 600)
         );
 
         $out = $this->obj->getOutImagesBlock();
-        $this->assertEquals('7cc0f7f47f7f317491be42bf0ad960c9', md5($out));
+        $this->assertEquals('71591a7ea1f027a1a8d15790cf1dd38e', md5($out));
 
         $xob = $this->obj->getXobjectDict();
         $this->assertEquals(
-            ' /IMG1 11 0 R /IMG2 12 0 R /IMG3 13 0 R /IMG4 15 0 R /IMG5 17 0 R /IMG6 18 0 R /IMG7 11 0 R '
-            .'/IMG8 21 0 R /IMG9 23 0 R /IMG10 24 0 R /IMG11 25 0 R /IMG12 26 0 R /IMG13 28 0 R /IMG14 30 0 R '
-            .'/IMG15 32 0 R /IMG16 34 0 R /IMG17 36 0 R',
+            ' /IMG1 11 0 R /IMG2 12 0 R /IMG3 13 0 R /IMG4 15 0 R /IMG5 17 0 R /IMG6 18 0 R /IMG7 11 0 R'
+            .' /IMG8 21 0 R /IMG9 23 0 R /IMG10 24 0 R /IMG11 25 0 R /IMG12 26 0 R /IMG13 28 0 R /IMG14 30 0 R'
+            .' /IMG15 32 0 R /IMG16 34 0 R /IMG17 36 0 R /IMG18 38 0 R /IMG19 40 0 R',
             $xob
         );
 
