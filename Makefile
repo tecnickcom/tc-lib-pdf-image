@@ -123,6 +123,7 @@ all: help
 
 # run the PHPUnit tests
 test:
+	@mkdir -p ./target/
 	nohup $(shell which php) -d always_populate_raw_post_data=-1 -t test/images -S localhost:$(PORT) > target/server.log 2>&1 & echo $$! > target/server.pid
 	./vendor/bin/phpunit test ; echo $$? > target/phpunit.exit; kill -9 `cat target/server.pid` ; exit `cat target/phpunit.exit`
 
