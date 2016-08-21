@@ -233,6 +233,5 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             .' /IMG15 32 0 R /IMG16 34 0 R /IMG17 36 0 R /IMG18 38 0 R /IMG19 40 0 R',
             $xob
         );
-
     }
 }
