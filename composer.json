@@ -14,10 +14,10 @@
     ],
     "require": {
         "php": ">=5.4",
-        "tecnickcom/tc-lib-file": "^1.6.0",
-        "tecnickcom/tc-lib-color": "^1.11.0",
-        "tecnickcom/tc-lib-pdf-graph": "^1.1.0",
-        "tecnickcom/tc-lib-pdf-encrypt": "^1.4.0"
+        "tecnickcom/tc-lib-file": "^1.6.2",
+        "tecnickcom/tc-lib-color": "^1.11.2",
+        "tecnickcom/tc-lib-pdf-graph": "^1.1.2",
+        "tecnickcom/tc-lib-pdf-encrypt": "^1.4.2"
     },
     "require-dev": {
         "apigen/apigen" : "^4.1.2",
