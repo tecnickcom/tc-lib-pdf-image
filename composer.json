@@ -15,8 +15,8 @@
     "require": {
         "php": ">=5.4",
         "tecnickcom/tc-lib-file": "^1.6.2",
-        "tecnickcom/tc-lib-color": "^1.11.2",
-        "tecnickcom/tc-lib-pdf-graph": "^1.1.2",
+        "tecnickcom/tc-lib-color": "^1.12.0",
+        "tecnickcom/tc-lib-pdf-graph": "^1.2.0",
         "tecnickcom/tc-lib-pdf-encrypt": "^1.4.2"
     },
     "require-dev": {
