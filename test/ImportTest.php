@@ -34,18 +34,13 @@ class ImportTest extends \PHPUnit_Framework_TestCase
     {
         //$this->markTestSkipped(); // skip this test
         $enc = new \Com\Tecnick\Pdf\Encrypt\Encrypt();
-        $this->obj = new \Com\Tecnick\Pdf\Image\Import(10, 0.75, $enc, false);
+        $this->obj = new \Com\Tecnick\Pdf\Image\Import(0.75, $enc, false);
     }
     
     public function testGetKey()
     {
         $result = $this->obj->getKey('/images/200x100_RGB.png', 200, 100, 100);
         $this->assertEquals('6EvJjr-KnDm4EnAWVt-7wQ', $result);
-    }
-    
-    public function testGetObjectNumber()
-    {
-        $this->assertEquals(10, $this->obj->getObjectNumber());
     }
 
     public function testGetImageDataByKeyError()
@@ -223,8 +218,10 @@ class ImportTest extends \PHPUnit_Framework_TestCase
             $this->obj->getSetImage($iid, 3, 5, 200, 100, 600)
         );
 
-        $out = $this->obj->getOutImagesBlock();
+        $out = $this->obj->getOutImagesBlock(10);
         $this->assertNotEmpty($out);
+
+        $this->assertEquals(40, $this->obj->getObjectNumber());
 
         $xob = $this->obj->getXobjectDict();
         $this->assertEquals(

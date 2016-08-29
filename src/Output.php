@@ -70,14 +70,12 @@ abstract class Output
     /**
      * Initialize images data
      *
-     * @param int     $pon    Current PDF Object Number
      * @param float   $kunit  Unit of measure conversion ratio.
      * @param Encrypt $enc    Encrypt object.
      * @param bool    $pdfa   True if we are in PDF/A mode.
      */
-    public function __construct($pon, $kunit, Encrypt $enc, $pdfa = false)
+    public function __construct($kunit, Encrypt $enc, $pdfa = false)
     {
-        $this->pon = (int) $pon;
         $this->kunit = (float) $kunit;
         $this->enc = $enc;
         $this->pdfa = (bool) $pdfa;
@@ -133,10 +131,13 @@ abstract class Output
     /**
      * Get the PDF output string for Images
      *
+     * @param int $pon Current PDF Object Number
+     *
      * @return string
      */
-    public function getOutImagesBlock()
+    public function getOutImagesBlock($pon)
     {
+        $this->pon = (int) $pon;
         $out = '';
         foreach ($this->image as $iid => $img) {
             if (empty($this->cache[$img['key']]['out'])) {
