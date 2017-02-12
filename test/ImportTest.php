@@ -15,6 +15,8 @@
 
 namespace Test;
 
+use PHPUnit\Framework\TestCase;
+
 /**
  * Unit Test
  *
@@ -26,7 +28,7 @@ namespace Test;
  * @license     http://www.gnu.org/copyleft/lesser.html GNU-LGPL v3 (see LICENSE.TXT)
  * @link        https://github.com/tecnickcom/tc-lib-pdf-image
  */
-class ImportTest extends \PHPUnit_Framework_TestCase
+class ImportTest extends TestCase
 {
     protected $obj = null;
 
@@ -43,54 +45,43 @@ class ImportTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('6EvJjr-KnDm4EnAWVt-7wQ', $result);
     }
 
+    /**
+     * @expectedException \Com\Tecnick\Pdf\Image\Exception
+     */
     public function testGetImageDataByKeyError()
     {
-        $this->setExpectedException('\Com\Tecnick\Pdf\Image\Exception');
         $this->obj->getImageDataByKey('missing');
     }
 
+    /**
+     * @expectedException \Com\Tecnick\Pdf\Image\Exception
+     */
     public function testGetSetImageError()
     {
-        $this->setExpectedException('\Com\Tecnick\Pdf\Image\Exception');
         $this->obj->getSetImage(1, 2, 3, 5, 7, 17);
     }
-    
-    public function testAddError1()
+
+    public function getBadAddValues()
     {
-        $this->setExpectedException('\Com\Tecnick\Pdf\Image\Exception');
-        $this->obj->add('');
+        return array(
+            array(''),
+            array(__DIR__.'/images/missing.png'),
+            array('@'),
+            array('@garbage'),
+            array('*'),
+            array('*http://www.example.com/image.png'),
+        );
     }
-    
-    public function testAddError2()
+
+    /**
+     * @expectedException \Com\Tecnick\Pdf\Image\Exception
+     * @dataProvider getBadAddValues
+     */
+    public function testAddError($bad)
     {
-        $this->setExpectedException('\Com\Tecnick\Pdf\Image\Exception');
-        $this->obj->add(__DIR__.'/images/missing.png');
+        $this->obj->add($bad);
     }
-    
-    public function testAddError3()
-    {
-        $this->setExpectedException('\Com\Tecnick\Pdf\Image\Exception');
-        $this->obj->add('@');
-    }
-    
-    public function testAddError4()
-    {
-        $this->setExpectedException('\Com\Tecnick\Pdf\Image\Exception');
-        $this->obj->add('@garbage');
-    }
-    
-    public function testAddError5()
-    {
-        $this->setExpectedException('\Com\Tecnick\Pdf\Image\Exception');
-        $this->obj->add('*');
-    }
-    
-    public function testAddError6()
-    {
-        $this->setExpectedException('\Com\Tecnick\Pdf\Image\Exception');
-        $this->obj->add('*http://www.example.com/image.png');
-    }
-    
+
     public function testAdd()
     {
         $iid = $this->obj->add(__DIR__.'/images/200x100_RGB.png');

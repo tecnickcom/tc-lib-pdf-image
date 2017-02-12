@@ -243,6 +243,9 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
      */
     protected function getData($data, $width, $height, $quality)
     {
+        if (!$data['native']) {
+            throw new ImageException('Unable to import image');
+        }
         $class = '\\Com\\Tecnick\\Pdf\\Image\\Import\\'.self::$native[$data['type']];
         $imp = new $class();
         $data = $imp->getData($data);
