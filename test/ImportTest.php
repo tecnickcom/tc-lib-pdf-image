@@ -30,6 +30,9 @@ use PHPUnit\Framework\TestCase;
  */
 class ImportTest extends TestCase
 {
+    /**
+     * @var \Com\Tecnick\Pdf\Image\Import
+     */
     protected $obj = null;
 
     public function setUp()
@@ -38,7 +41,7 @@ class ImportTest extends TestCase
         $enc = new \Com\Tecnick\Pdf\Encrypt\Encrypt();
         $this->obj = new \Com\Tecnick\Pdf\Image\Import(0.75, $enc, false);
     }
-    
+
     public function testGetKey()
     {
         $result = $this->obj->getKey('/images/200x100_RGB.png', 200, 100, 100);
@@ -183,7 +186,7 @@ class ImportTest extends TestCase
             'q 150.000000 0 0 75.000000 2.250000 371.250000 cm /IMGmask16 Do /IMGplain16 Do Q',
             $this->obj->getSetImage($iid, 3, 5, 200, 100, 600)
         );
-        
+
 
         $iid = $this->obj->add(__DIR__.'/images/200x100_CMYK.jpg');
         $this->assertEquals(

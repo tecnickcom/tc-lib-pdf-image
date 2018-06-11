@@ -15,9 +15,7 @@
 
 namespace Com\Tecnick\Pdf\Image\Import;
 
-use \Com\Tecnick\File\File;
 use \Com\Tecnick\File\Byte;
-use \Com\Tecnick\Pdf\Image\Exception as ImageException;
 
 /**
  * Com\Tecnick\Pdf\Image\Import\Jpeg
@@ -30,12 +28,12 @@ use \Com\Tecnick\Pdf\Image\Exception as ImageException;
  * @license     http://www.gnu.org/copyleft/lesser.html GNU-LGPL v3 (see LICENSE.TXT)
  * @link        https://github.com/tecnickcom/tc-lib-pdf-image
  */
-class Jpeg
+class Jpeg implements ImageImportInterface
 {
     /**
      * Extract data from a JPEG image
      *
-     * @param string $data Image raw data
+     * @param array $data Image raw data
      *
      * @return array Image raw data array
      */
