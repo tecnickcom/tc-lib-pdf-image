@@ -15,7 +15,6 @@
 
 namespace Com\Tecnick\Pdf\Image\Import;
 
-use \Com\Tecnick\File\File;
 use \Com\Tecnick\File\Byte;
 use \Com\Tecnick\Pdf\Image\Exception as ImageException;
 
@@ -30,12 +29,12 @@ use \Com\Tecnick\Pdf\Image\Exception as ImageException;
  * @license     http://www.gnu.org/copyleft/lesser.html GNU-LGPL v3 (see LICENSE.TXT)
  * @link        https://github.com/tecnickcom/tc-lib-pdf-image
  */
-class Png
+class Png implements ImageImportInterface
 {
     /**
      * Extract data from a PNG image
      *
-     * @param string $data Image raw data
+     * @param array $data Image raw data
      *
      * @return array Image raw data array
      */
@@ -94,7 +93,7 @@ class Png
      *
      * The header chunk (IHDR) contains basic information about the image data and must appear as the first chunk,
      * and there must only be one header chunk in a PNG data stream.
-     * @param string $data   Image raw data
+     * @param array  $data   Image raw data
      * @param int    $offset Current byte offset
      *
      * @return array Image raw data array
@@ -137,7 +136,7 @@ class Png
     /**
      * Extract chunks data from a PNG image
      *
-     * @param string $data   Image raw data
+     * @param array  $data   Image raw data
      * @param int    $offset Current byte offset
      *
      * @return array Image raw data array
@@ -180,7 +179,7 @@ class Png
      * The palette chunk (PLTE) stores the colormap data associated with the image data.
      * This chunk is presentonly if the image data uses a color palette and must appear before the image data chunk.
      *
-     * @param string $data   Image raw data
+     * @param array  $data   Image raw data
      * @param int    $offset Current byte offset
      * @param int    $len    NUmber of bytes in this chunk
      *
@@ -197,7 +196,7 @@ class Png
     /**
      * Extract the tRNS chunk data
      *
-     * @param string $data   Image raw data
+     * @param array  $data   Image raw data
      * @param int    $offset Current byte offset
      * @param int    $len    NUmber of bytes in this chunk
      *
@@ -230,7 +229,7 @@ class Png
      * The image data chunk (IDAT) stores the actual image data,
      * and multiple image data chunks may occur in a data stream and must be stored in contiguous order.
      *
-     * @param string $data   Image raw data
+     * @param array  $data   Image raw data
      * @param int    $offset Current byte offset
      * @param int    $len    NUmber of bytes in this chunk
      *
@@ -248,7 +247,7 @@ class Png
      * Extract the iCCP chunk data
      *
      * @param Byte   $byte   Byte class object
-     * @param string $data   Image raw data
+     * @param array  $data   Image raw data
      * @param int    $offset Current byte offset
      * @param int    $len    NUmber of bytes in this chunk
      *

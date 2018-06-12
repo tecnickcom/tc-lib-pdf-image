@@ -16,10 +16,8 @@
 namespace Com\Tecnick\Pdf\Image;
 
 use \Com\Tecnick\File\File;
-use \Com\Tecnick\File\Byte;
-use \Com\Tecnick\Pdf\Image\Import\Jpeg;
-use \Com\Tecnick\Pdf\Image\Import\Png;
 use \Com\Tecnick\Pdf\Image\Exception as ImageException;
+use Com\Tecnick\Pdf\Image\Import\ImageImportInterface;
 
 /**
  * Com\Tecnick\Pdf\Image\Import
@@ -41,7 +39,7 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
      * @var int
      */
     protected $iid = 0;
-    
+
     /**
      * Stack of added images.
      *
@@ -109,7 +107,6 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
      * @param bool   $ismask   True if the image is a transparency mask
      * @param int    $quality  Quality for JPEG files (0 = max compression; 100 = best quality, bigger file).
      * @param bool   $defprint Indicate if the image is the default for printing when used as alternative image.
-     * @param bool   $hidden   True to not display this image (used for alternate images).
      * @param array  $altimgs  Arrays of alternate image keys.
      *
      * @return int Image ID
@@ -234,20 +231,19 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
     /**
      * Extract the relevant data from the image
      *
-     * @param string $data Image raw data
+     * @param array  $data    Image raw data
      * @param int    $width   Width in pixels
      * @param int    $height  Height in pixels
      * @param int    $quality Quality for JPEG files
      *
-     * @return string
+     * @return array
      */
     protected function getData($data, $width, $height, $quality)
     {
         if (!$data['native']) {
             throw new ImageException('Unable to import image');
         }
-        $class = '\\Com\\Tecnick\\Pdf\\Image\\Import\\'.self::$native[$data['type']];
-        $imp = new $class();
+        $imp = $this->createImportImage($data);
         $data = $imp->getData($data);
 
         if (!empty($data['recode'])) {
@@ -256,6 +252,17 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
             $data = $imp->getData($data);
         }
         return $data;
+    }
+
+    /**
+     * @param array $data Image raw data
+     *
+     * @return ImageImportInterface
+     */
+    private function createImportImage($data)
+    {
+        $class = '\\Com\\Tecnick\\Pdf\\Image\\Import\\'.self::$native[$data['type']];
+        return new $class();
     }
 
     /**
@@ -315,7 +322,7 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
     /**
      * Get the image meta data
      *
-     * @param string $data Image raw data
+     * @param array $data Image raw data
      *
      * @return array Image raw data array
      */
@@ -347,7 +354,7 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
      * Get the resized image raw data
      * (always convert the image type to a native format: PNG or JPEG)
      *
-     * @param string $data    Image raw data as returned by getImageRawData
+     * @param array  $data    Image raw data as returned by getImageRawData
      * @param int    $width   New width in pixels
      * @param int    $height  New height in pixels
      * @param bool   $alpha   If true save the alpha channel information, if false merge the alpha channel (PNG mode)
@@ -388,7 +395,7 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
     /**
      * Extract the alpha channel as separate image to be used as a mask
      *
-     * @param string $data Image raw data as returned by getImageRawData
+     * @param array $data Image raw data as returned by getImageRawData
      *
      * @return array Image raw data array
      */

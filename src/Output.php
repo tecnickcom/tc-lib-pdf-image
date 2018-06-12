@@ -15,7 +15,6 @@
 
 namespace Com\Tecnick\Pdf\Image;
 
-use \Com\Tecnick\Pdf\Image\Import;
 use \Com\Tecnick\Pdf\Encrypt\Encrypt;
 use \Com\Tecnick\Pdf\Image\Exception as ImageException;
 
@@ -66,6 +65,20 @@ abstract class Output
      * @var array
      */
     protected $xobjdict = array();
+
+    /**
+     * Image structure
+     *
+     * @var array
+     */
+    protected $image = [];
+
+    /**
+     * Images cache
+     *
+     * @var array
+     */
+    protected $cache = [];
 
     /**
      * Initialize images data
@@ -320,11 +333,11 @@ abstract class Output
             $out .= ' /Decode [1 0 1 0 1 0 1 0]';
         }
         $out .= ' /BitsPerComponent '.$data['bits'];
-        
+
         if (!empty($this->cache[$data['key']]['mask']['obj'])) {
             $out .= ' /SMask '.$this->cache[$data['key']]['mask']['obj'].' 0 R';
         }
-        
+
         if (!empty($data['obj_alt'])) {
             // reference to alternate images dictionary
             $out .= ' /Alternates '.$data['obj_alt'].' 0 R';
