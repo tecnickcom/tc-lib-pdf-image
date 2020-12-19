@@ -64,7 +64,6 @@ class ImportTest extends TestUtil
             array(__DIR__.'/images/missing.png'),
             array('@'),
             array('@garbage'),
-            array('*'),
             array('*http://www.example.com/image.png'),
         );
     }
