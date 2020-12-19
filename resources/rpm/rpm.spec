@@ -22,9 +22,9 @@ Requires:  php-zlib
 Requires:  php-composer(%{c_vendor}/tc-lib-file) < 2.0.0
 Requires:  php-composer(%{c_vendor}/tc-lib-file) >= 1.6.14
 Requires:  php-composer(%{c_vendor}/tc-lib-color) < 2.0.0
-Requires:  php-composer(%{c_vendor}/tc-lib-color) >= 1.12.15
+Requires:  php-composer(%{c_vendor}/tc-lib-color) >= 1.14.0
 Requires:  php-composer(%{c_vendor}/tc-lib-pdf-encrypt) < 2.0.0
-Requires:  php-composer(%{c_vendor}/tc-lib-pdf-encrypt) >= 1.5.10
+Requires:  php-composer(%{c_vendor}/tc-lib-pdf-encrypt) >= 1.6.0
 
 Provides:  php-composer(%{c_vendor}/%{gh_project}) = %{version}
 Provides:  php-%{gh_project} = %{version}
@@ -33,7 +33,7 @@ Provides:  php-%{gh_project} = %{version}
 PHP library containing PDF Image methods
 
 %build
-(cd %{_current_directory} && make build)
+#(cd %{_current_directory} && make build)
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -41,7 +41,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %clean
 rm -rf $RPM_BUILD_ROOT
-(cd %{_current_directory} && make clean)
+#(cd %{_current_directory} && make clean)
 
 %files
 %attr(-,root,root) %{_libpath}

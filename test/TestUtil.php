@@ -1,16 +1,16 @@
 <?php
 /**
- * UnitTest.php
+ * TestUtil.php
  *
- * @since       2011-05-23
+ * @since       2020-12-19
  * @category    Library
  * @package     PdfImage
  * @author      Nicola Asuni <info@tecnick.com>
- * @copyright   2011-2015 Nicola Asuni - Tecnick.com LTD
+ * @copyright   2015-2021 Nicola Asuni - Tecnick.com LTD
  * @license     http://www.gnu.org/copyleft/lesser.html GNU-LGPL v3 (see LICENSE.TXT)
  * @link        https://github.com/tecnickcom/tc-lib-pdf-image
  *
- * This file is part of tc-lib-pdf-image software library.
+ * This file is part of tc-lib-color software library.
  */
 
 namespace Test;
@@ -18,25 +18,23 @@ namespace Test;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Unit Test
+ * Web Color class test
  *
- * @since       2011-05-23
+ * @since      2020-12-19
  * @category    Library
  * @package     PdfImage
  * @author      Nicola Asuni <info@tecnick.com>
- * @copyright   2011-2015 Nicola Asuni - Tecnick.com LTD
+ * @copyright   2015-2021 Nicola Asuni - Tecnick.com LTD
  * @license     http://www.gnu.org/copyleft/lesser.html GNU-LGPL v3 (see LICENSE.TXT)
  * @link        https://github.com/tecnickcom/tc-lib-pdf-image
  */
-class UnitTest extends TestCase
+class TestUtil extends TestCase
 {
-    public function setUp()
+    public function bcExpectException($exception)
     {
-        //$this->markTestSkipped(); // skip this test
-    }
-    
-    public function testDummy()
-    {
-        $this->assertTrue(true);
+        if (\is_callable(['parent', 'expectException'])) {
+            return parent::expectException($exception);
+        }
+        return parent::setExpectedException($exception);
     }
 }
