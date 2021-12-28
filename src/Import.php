@@ -415,7 +415,7 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
                 // get and correct gamma color
                 $color = imagecolorsforindex($img, $colindex);
                 // GD alpha is only 7 bit (0 -> 127); 2.2 is the gamma value
-                $alpha = (pow(((127 - $color['alpha']) / 127), 2.2) * 255);
+                $alpha = floor(pow(((127 - $color['alpha']) / 127), 2.2) * 255);
                 imagesetpixel($newimg, $xpx, $ypx, $alpha);
             }
         }
