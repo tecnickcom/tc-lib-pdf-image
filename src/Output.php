@@ -60,7 +60,7 @@ abstract class Output
     protected $pdfa = false;
 
     /**
-     * Store image object IDs for the XObject Dctionary.
+     * Store image object IDs for the XObject Dictionary.
      *
      * @var array
      */
