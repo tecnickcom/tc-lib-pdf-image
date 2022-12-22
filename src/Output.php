@@ -166,9 +166,9 @@ abstract class Output
             }
 
             if (!empty($this->cache[$img['key']]['mask']['obj'])) {
-                $this->xobjdict['IMG'.$img['iid']] = $this->cache[$img['key']]['mask']['obj'];
+                $this->xobjdict['IMGmask'.$img['iid']] = $this->cache[$img['key']]['mask']['obj'];
                 if (!empty($this->cache[$img['key']]['plain']['obj'])) {
-                    $this->xobjdict['IMG'.$img['iid']] = $this->cache[$img['key']]['plain']['obj'];
+                    $this->xobjdict['IMGplain'.$img['iid']] = $this->cache[$img['key']]['plain']['obj'];
                 }
             } else {
                 $this->xobjdict['IMG'.$img['iid']] = $this->cache[$img['key']]['obj'];
@@ -334,7 +334,7 @@ abstract class Output
         }
         $out .= ' /BitsPerComponent '.$data['bits'];
 
-        if (!empty($this->cache[$data['key']]['mask']['obj'])) {
+        if (!$data['ismask'] && !empty($this->cache[$data['key']]['mask']['obj'])) {
             $out .= ' /SMask '.$this->cache[$data['key']]['mask']['obj'].' 0 R';
         }
 

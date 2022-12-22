@@ -208,13 +208,14 @@ class ImportTest extends TestUtil
         $out = $testObj->getOutImagesBlock(10);
         $this->assertNotEmpty($out);
 
-        $this->assertEquals(38, $testObj->getObjectNumber());
+        $this->assertEquals(37, $testObj->getObjectNumber());
 
         $xob = $testObj->getXobjectDict();
         $this->assertEquals(
-            ' /IMG1 11 0 R /IMG2 12 0 R /IMG3 13 0 R /IMG4 15 0 R /IMG5 17 0 R /IMG6 18 0 R /IMG7 11 0 R'
-            .' /IMG8 21 0 R /IMG9 23 0 R /IMG10 24 0 R /IMG11 25 0 R /IMG12 26 0 R /IMG13 28 0 R /IMG14 30 0 R'
-            .' /IMG15 32 0 R /IMG16 34 0 R /IMG17 36 0 R /IMG18 38 0 R',
+            ' /IMG1 11 0 R /IMG2 12 0 R /IMG3 13 0 R /IMG4 15 0 R /IMG5 17 0 R /IMG6 18 0 R'
+            .' /IMG7 11 0 R /IMGmask8 19 0 R /IMGplain8 20 0 R /IMG9 22 0 R /IMGmask10 23 0 R'
+            .' /IMGmask11 24 0 R /IMGmask12 25 0 R /IMG13 27 0 R /IMG14 29 0 R /IMG15 31 0 R'
+            .' /IMGmask16 32 0 R /IMGplain16 33 0 R /IMG17 35 0 R /IMG18 37 0 R',
             $xob
         );
     }

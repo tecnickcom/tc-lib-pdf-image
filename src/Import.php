@@ -216,15 +216,17 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
             $data['mask'] = $data;
         } elseif (!empty($data['splitalpha'])) {
             // create 2 separate images: plain + mask
-            $data['plain'] = $this->getResizedRawData($data, $width, $height, false, $quality);
+            $rawdata = $data;
+            $data['plain'] = $this->getResizedRawData($rawdata, $width, $height, false, $quality);
             $data['plain'] = $this->getData($data['plain'], $width, $height, $quality);
-            $data['mask'] = $this->getAlphaChannelRawData($data);
+            $data['plain']['colspace'] = substr($data['plain']['colspace'], 0, -6);
+            $data['mask'] = $this->getAlphaChannelRawData($rawdata);
             $data['mask'] = $this->getData($data['mask'], $width, $height, $quality);
+            $data['mask']['colspace'] = 'DeviceGray';
         }
 
         // store data in cache
         $this->cache[$imgkey] = $data;
-
         return $data;
     }
 
@@ -341,10 +343,10 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
         if (isset($meta['bits'])) {
             $data['bits'] = intval($meta['bits']);
         }
-        if (isset($meta['channels'])) {
+        if (!empty($meta['channels'])) {
             $data['channels'] = intval($meta['channels']);
         }
-        if (isset(self::$colspacemap[$data['channels']])) {
+        if (!empty(self::$colspacemap[$data['channels']])) {
             $data['colspace'] = self::$colspacemap[$data['channels']];
         }
         return $data;
@@ -422,9 +424,11 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
         ob_start();
         imagepng($newimg, null, 9, PNG_ALL_FILTERS);
         $data['raw'] = ob_get_clean();
+        $data['channels'] = 1;
         $data['colspace'] = 'DeviceGray';
         $data['exturl'] = false;
         $data['recoded'] = true;
+        $data['ismask'] = true;
         return $this->getMetaData($data);
     }
 }
