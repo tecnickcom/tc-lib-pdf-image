@@ -32,21 +32,21 @@ use \Com\Tecnick\Pdf\Image\Exception as ImageException;
 abstract class Output
 {
     /**
-     * Current PDF object number
+     * Current PDF object number.
      *
      * @var int
      */
     protected $pon;
 
     /**
-     * Unit of measure conversion ratio
+     * Unit of measure conversion ratio.
      *
      * @var float
      */
     protected $kunit = 1.0;
 
     /**
-     * Encrypt object
+     * Encrypt object.
      *
      * @var Encrypt
      */
@@ -67,21 +67,21 @@ abstract class Output
     protected $xobjdict = array();
 
     /**
-     * Image structure
+     * Image structure.
      *
      * @var array
      */
     protected $image = [];
 
     /**
-     * Images cache
+     * Images cache.
      *
      * @var array
      */
     protected $cache = [];
 
     /**
-     * Initialize images data
+     * Initialize images data.
      *
      * @param float   $kunit  Unit of measure conversion ratio.
      * @param Encrypt $enc    Encrypt object.
@@ -95,7 +95,7 @@ abstract class Output
     }
 
     /**
-     * Returns current PDF object number
+     * Returns current PDF object number.
      *
      * @return int
      */
@@ -105,16 +105,16 @@ abstract class Output
     }
 
     /**
-     * Get the PDF output string to print the specified image ID
+     * Get the PDF output string to print the specified image ID.
      *
-     * @param int $iid        Image ID
-     * @param int $xpos       Abscissa (X coordinate) of the upper-left Image corner
-     * @param int $ypos       Ordinate (Y coordinate) of the upper-left Image corner
-     * @param int $width      Image width in user units
-     * @param int $height     Image height in user units
-     * @param int $pageheight Page height in user units
+     * @param int $iid        Image ID.
+     * @param int $xpos       Abscissa (X coordinate) of the upper-left Image corner.
+     * @param int $ypos       Ordinate (Y coordinate) of the upper-left Image corner.
+     * @param int $width      Image width in user units.
+     * @param int $height     Image height in user units.
+     * @param int $pageheight Page height in user units.
      *
-     * @return string
+     * @return string Image PDF page content.
      */
     public function getSetImage($iid, $xpos, $ypos, $width, $height, $pageheight)
     {
@@ -142,11 +142,11 @@ abstract class Output
     }
 
     /**
-     * Get the PDF output string for Images
+     * Get the PDF output string for Images.
      *
-     * @param int $pon Current PDF Object Number
+     * @param int $pon Current PDF Object Number.
      *
-     * @return string
+     * @return string PDF code for the images block.
      */
     public function getOutImagesBlock($pon)
     {
@@ -166,7 +166,8 @@ abstract class Output
             }
 
             if (!empty($this->cache[$img['key']]['mask']['obj'])) {
-                $this->xobjdict['IMGmask'.$img['iid']] = $this->cache[$img['key']]['mask']['obj'];
+                // the mask image must be omitted
+                // $this->xobjdict['IMGmask'.$img['iid']] = $this->cache[$img['key']]['mask']['obj'];
                 if (!empty($this->cache[$img['key']]['plain']['obj'])) {
                     $this->xobjdict['IMGplain'.$img['iid']] = $this->cache[$img['key']]['plain']['obj'];
                 }
@@ -178,13 +179,13 @@ abstract class Output
     }
 
     /**
-     * Get the PDF output string for Image object
+     * Get the PDF output string for Image object.
      *
-     * @param array  $img  Image reference
-     * @param array  $data Image raw data
-     * @param string $sub  Sub image ('mask', 'plain' or empty string)
+     * @param array  $img  Image reference.
+     * @param array  $data Image raw data.
+     * @param string $sub  Sub image ('mask', 'plain' or empty string).
      *
-     * @return string
+     * @return string PDF Image object.
      */
     protected function getOutImage(&$img, &$data, $sub = '')
     {
@@ -241,7 +242,7 @@ abstract class Output
     }
 
     /**
-    * Return XObjects Dictionary portion for the images
+    * Return XObjects Dictionary portion for the images.
     *
     * @return string
     */
@@ -255,9 +256,9 @@ abstract class Output
     }
 
     /**
-     * Get the PDF output string for ICC object
+     * Get the PDF output string for ICC object.
      *
-     * @param array  $data Image raw data
+     * @param array  $data Image raw data.
      *
      * @return string
      */
@@ -282,9 +283,9 @@ abstract class Output
     }
 
     /**
-     * Get the PDF output string for Indexed palette object
+     * Get the PDF output string for Indexed palette object.
      *
-     * @param array  $data Image raw data
+     * @param array  $data Image raw data.
      *
      * @return string
      */
@@ -307,9 +308,9 @@ abstract class Output
     }
 
     /**
-     * Get the PDF output string for color and mask information
+     * Get the PDF output string for color and mask information.
      *
-     * @param array  $data Image raw data
+     * @param array  $data Image raw data.
      *
      * @return string
      */
@@ -346,11 +347,11 @@ abstract class Output
     }
 
     /**
-     * Get the PDF output string for Alternate images object
+     * Get the PDF output string for Alternate images object.
      *
-     * @param array  $img  Image reference
-     * @param array  $data Image raw data
-     * @param string $sub  Sub image ('mask', 'plain' or empty string)
+     * @param array  $img  Image reference.
+     * @param array  $data Image raw data.
+     * @param string $sub  Sub image ('mask', 'plain' or empty string).
      *
      * @return string
      */
@@ -379,9 +380,9 @@ abstract class Output
     }
 
     /**
-     * Get the PDF output string for color and mask information
+     * Get the PDF output string for color and mask information.
      *
-     * @param array  $data Image raw data
+     * @param array  $data Image raw data.
      *
      * @return string
      */

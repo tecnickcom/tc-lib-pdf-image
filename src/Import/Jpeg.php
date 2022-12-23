@@ -31,11 +31,11 @@ use \Com\Tecnick\File\Byte;
 class Jpeg implements ImageImportInterface
 {
     /**
-     * Extract data from a JPEG image
+     * Extract data from a JPEG image.
      *
-     * @param array $data Image raw data
+     * @param array $data Image raw data.
      *
-     * @return array Image raw data array
+     * @return array Image raw data array.
      */
     public function getData($data)
     {

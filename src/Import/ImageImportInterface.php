@@ -29,11 +29,11 @@ namespace Com\Tecnick\Pdf\Image\Import;
 interface ImageImportInterface
 {
     /**
-     * Extract data from an image
+     * Extract data from an image.
      *
-     * @param array $data Image raw data
+     * @param array $data Image raw data.
      *
-     * @return array Image raw data array
+     * @return array Image raw data array.
      */
     public function getData($data);
 }
