@@ -60,6 +60,13 @@ abstract class Output
     protected $pdfa = false;
 
     /**
+     * Enable stream compression.
+     *
+     * @var int
+     */
+    protected $compress = true;
+
+    /**
      * Store image object IDs for the XObject Dictionary.
      *
      * @var array
@@ -83,15 +90,21 @@ abstract class Output
     /**
      * Initialize images data.
      *
-     * @param float   $kunit  Unit of measure conversion ratio.
-     * @param Encrypt $enc    Encrypt object.
-     * @param bool    $pdfa   True if we are in PDF/A mode.
+     * @param float   $kunit    Unit of measure conversion ratio.
+     * @param Encrypt $enc      Encrypt object.
+     * @param bool    $pdfa     True if we are in PDF/A mode.
+     * @param bool    $compress Set to false to disable stream compression.
      */
-    public function __construct($kunit, Encrypt $enc, $pdfa = false)
-    {
+    public function __construct(
+        $kunit,
+        Encrypt $enc,
+        $pdfa = false,
+        $compress = true
+    ) {
         $this->kunit = (float) $kunit;
         $this->enc = $enc;
         $this->pdfa = (bool) $pdfa;
+        $this->compress = (bool) $compress;
     }
 
     /**
@@ -267,19 +280,24 @@ abstract class Output
         if (empty($data['icc'])) {
             return '';
         }
-
         $data['obj_icc'] = ++$this->pon;
-        $stream = $this->enc->encryptString(gzcompress($data['icc']), $this->pon);
-
-        return $this->pon.' 0 obj'."\n"
-            .'<</N '.$data['channels']
-            .' /Alternate /'.$data['colspace']
-            .' /Filter /FlateDecode'
-            .' /Length '.strlen($stream)
-            .'>> stream'."\n"
+        $out = $data['obj_icc'].' 0 obj'."\n"
+            .'<<'
+            .' /N '.$data['channels']
+            .' /Alternate /'.$data['colspace'];
+        $icc = $data['icc'];
+        if ($this->compress) {
+            $out .= ' /Filter /FlateDecode';
+            $icc = gzcompress($icc);
+        }
+        $stream = $this->enc->encryptString($icc, $this->pon);
+        $out .= ' /Length '.strlen($stream)
+            .' >>'
+            .' stream'."\n"
             .$stream."\n"
             .'endstream'."\n"
             .'endobj'."\n";
+        return $out;
     }
 
     /**
@@ -294,17 +312,22 @@ abstract class Output
         if ($data['colspace'] != 'Indexed') {
             return '';
         }
-
         $data['obj_pal'] = ++$this->pon;
-        $stream = $this->enc->encryptString(gzcompress($data['pal']), $this->pon);
-
-        return $this->pon.' 0 obj'."\n"
-            .'<</Filter /FlateDecode'
-            .' /Length '.strlen($stream)
-            .'>> stream'."\n"
+        $out = $data['obj_pal'].' 0 obj'."\n"
+            .'<<';
+        $pal = $data['pal'];
+        if ($this->compress) {
+            $out .= '/Filter /FlateDecode';
+            $pal = gzcompress($pal);
+        }
+        $stream = $this->enc->encryptString($pal, $this->pon);
+        $out .= ' /Length '.strlen($stream)
+            .'>>'
+            .' stream'."\n"
             .$stream."\n"
             .'endstream'."\n"
             .'endobj'."\n";
+        return $out;
     }
 
     /**
