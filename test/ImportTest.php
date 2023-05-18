@@ -57,7 +57,7 @@ class ImportTest extends TestUtil
         $testObj->getSetImage(1, 2, 3, 5, 7, 17);
     }
 
-    public function getBadAddValues()
+    public static function getBadAddValues()
     {
         return array(
             array(''),
