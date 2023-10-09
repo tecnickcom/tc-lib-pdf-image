@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Png.php
  *
@@ -15,8 +16,8 @@
 
 namespace Com\Tecnick\Pdf\Image\Import;
 
-use \Com\Tecnick\File\Byte;
-use \Com\Tecnick\Pdf\Image\Exception as ImageException;
+use Com\Tecnick\File\Byte;
+use Com\Tecnick\Pdf\Image\Exception as ImageException;
 
 /**
  * Com\Tecnick\Pdf\Image\Import\Png
@@ -45,7 +46,7 @@ class Png implements ImageImportInterface
 
         $offset = 0;
         // check signature
-        if (substr($data['raw'], $offset, 8) != chr(137).'PNG'.chr(13).chr(10).chr(26).chr(10)) {
+        if (substr($data['raw'], $offset, 8) != chr(137) . 'PNG' . chr(13) . chr(10) . chr(26) . chr(10)) {
             // @codeCoverageIgnoreStart
             throw new ImageException('Not a PNG image');
             // @codeCoverageIgnoreEnd
@@ -56,7 +57,8 @@ class Png implements ImageImportInterface
         $data = $this->getIhdrChunk($data, $offset);
 
         // check compression, filter and interlacing settings
-        if (($byte->getByte($offset++) != 0)
+        if (
+            ($byte->getByte($offset++) != 0)
             || ($byte->getByte($offset++) != 0)
             || ($byte->getByte($offset++) != 0)
         ) {
@@ -79,11 +81,11 @@ class Png implements ImageImportInterface
         }
 
         $data['parms'] = '/DecodeParms <<'
-            .' /Predictor 15'
-            .' /Colors '.$data['channels']
-            .' /BitsPerComponent '.$data['bits']
-            .' /Columns '.$data['width']
-            .' >>';
+            . ' /Predictor 15'
+            . ' /Colors ' . $data['channels']
+            . ' /BitsPerComponent ' . $data['bits']
+            . ' /Columns ' . $data['width']
+            . ' >>';
 
         $offset += 4;
         return $this->getChunks($data, $offset);

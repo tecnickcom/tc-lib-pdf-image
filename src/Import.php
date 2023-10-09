@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Import.php
  *
@@ -15,8 +16,8 @@
 
 namespace Com\Tecnick\Pdf\Image;
 
-use \Com\Tecnick\File\File;
-use \Com\Tecnick\Pdf\Image\Exception as ImageException;
+use Com\Tecnick\File\File;
+use Com\Tecnick\Pdf\Image\Exception as ImageException;
 use Com\Tecnick\Pdf\Image\Import\ImageImportInterface;
 
 /**
@@ -148,7 +149,7 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
         return strtr(
             rtrim(
                 base64_encode(
-                    pack('H*', md5($image.$width.$height.$quality))
+                    pack('H*', md5($image . $width . $height . $quality))
                 ),
                 '='
             ),
@@ -201,6 +202,7 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
             $width = $data['width'];
         }
         $width = max(0, intval($width));
+
         if ($height === null) {
             $height = $data['height'];
         }
@@ -262,7 +264,7 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
      */
     private function createImportImage($data)
     {
-        $class = '\\Com\\Tecnick\\Pdf\\Image\\Import\\'.self::$native[$data['type']];
+        $class = '\\Com\\Tecnick\\Pdf\\Image\\Import\\' . self::$native[$data['type']];
         return new $class();
     }
 
@@ -301,21 +303,23 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
             'ismask'   => false,         // true if the image is a transparency mask
         );
 
-        if (empty($image)) {
+        if (empty($image) || ((($image[0] === '@') || ($image[0] === '*')) && (strlen($image) === 1))) {
             throw new ImageException('Empty image');
         }
 
         if ($image[0] === '@') { // image from string
             $data['raw'] = substr($image, 1);
-        } else {
-            if ($image[0] === '*') { // not-embedded external URL
-                $data['exturl'] = true;
-                $image = substr($image, 1);
-            }
-            $data['file'] = $image;
-            $fobj = new File();
-            $data['raw'] = $fobj->getFileData($image);
+            return $this->getMetaData($data);
         }
+
+        if ($image[0] === '*') { // not-embedded external URL
+            $data['exturl'] = true;
+            $image = substr($image, 1);
+        }
+
+        $data['file'] = $image;
+        $fobj = new File();
+        $data['raw'] = $fobj->getFileData($image);
 
         return $this->getMetaData($data);
     }
@@ -330,9 +334,12 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
     protected function getMetaData($data)
     {
         try {
-            $meta = getimagesizefromstring($data['raw']);
+            $meta = @getimagesizefromstring($data['raw']);
         } catch (\Exception $exc) {
-            throw new ImageException('Invalid image format: '.$exc);
+            throw new ImageException('Invalid image format: ' . $exc);
+        }
+        if ($meta === false) {
+             throw new ImageException('Invalid image format');
         }
         $data['width'] = $meta[0];
         $data['height'] = $meta[1];
@@ -365,6 +372,9 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
      */
     protected function getResizedRawData($data, $width, $height, $alpha = true, $quality = 100)
     {
+        if (($width <= 0) || ($height <= 0)) {
+            throw new ImageException('Image width and/or height are empty');
+        }
         $img = imagecreatefromstring($data['raw']);
         $newimg = imagecreatetruecolor($width, $height);
         imageinterlace($newimg, 0);
@@ -373,7 +383,8 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
         imagecopyresampled($newimg, $img, 0, 0, 0, 0, $width, $height, $data['width'], $data['height']);
         ob_start();
         if ($data['mapto'] == IMAGETYPE_PNG) {
-            if ((($tid = imagecolortransparent($img)) >= 0)
+            if (
+                (($tid = imagecolortransparent($img)) >= 0)
                 && (($palsize = imagecolorstotal($img)) > 0)
                 && ($tid < $palsize)
             ) {

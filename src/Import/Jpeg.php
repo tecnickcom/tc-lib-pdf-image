@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Jpeg.php
  *
@@ -15,7 +16,7 @@
 
 namespace Com\Tecnick\Pdf\Image\Import;
 
-use \Com\Tecnick\File\Byte;
+use Com\Tecnick\File\Byte;
 
 /**
  * Com\Tecnick\Pdf\Image\Import\Jpeg
@@ -45,7 +46,7 @@ class Jpeg implements ImageImportInterface
         // extract embedded ICC profile (if any)
         $icc = array();
         $offset = 0;
-        while (($pos = strpos($data['raw'], 'ICC_PROFILE'."\0", $offset)) !== false) {
+        while (($pos = strpos($data['raw'], 'ICC_PROFILE' . "\0", $offset)) !== false) {
             // get ICC sequence length
             $length = ($byte->getUShort($pos - 2) - 16);
             // marker sequence number

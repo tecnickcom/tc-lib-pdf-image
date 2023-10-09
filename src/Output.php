@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Output.php
  *
@@ -15,8 +16,8 @@
 
 namespace Com\Tecnick\Pdf\Image;
 
-use \Com\Tecnick\Pdf\Encrypt\Encrypt;
-use \Com\Tecnick\Pdf\Image\Exception as ImageException;
+use Com\Tecnick\Pdf\Encrypt\Encrypt;
+use Com\Tecnick\Pdf\Image\Exception as ImageException;
 
 /**
  * Com\Tecnick\Pdf\Image\Output
@@ -132,7 +133,7 @@ abstract class Output
     public function getSetImage($iid, $xpos, $ypos, $width, $height, $pageheight)
     {
         if (empty($this->image[$iid])) {
-            throw new ImageException('Unknown image ID: '.$iid);
+            throw new ImageException('Unknown image ID: ' . $iid);
         }
         $out = 'q';
         $out .= sprintf(
@@ -143,12 +144,12 @@ abstract class Output
             (($pageheight - $ypos - $height) * $this->kunit) // reverse coordinate
         );
         if (!empty($this->cache[$this->image[$iid]['key']]['mask'])) {
-            $out .= ' /IMGmask'.$iid.' Do';
+            $out .= ' /IMGmask' . $iid . ' Do';
             if (!empty($this->cache[$this->image[$iid]['key']]['plain'])) {
-                $out .= ' /IMGplain'.$iid.' Do';
+                $out .= ' /IMGplain' . $iid . ' Do';
             }
         } else {
-            $out .= ' /IMG'.$iid.' Do';
+            $out .= ' /IMG' . $iid . ' Do';
         }
         $out .= ' Q';
         return $out;
@@ -182,10 +183,10 @@ abstract class Output
                 // the mask image must be omitted
                 // $this->xobjdict['IMGmask'.$img['iid']] = $this->cache[$img['key']]['mask']['obj'];
                 if (!empty($this->cache[$img['key']]['plain']['obj'])) {
-                    $this->xobjdict['IMGplain'.$img['iid']] = $this->cache[$img['key']]['plain']['obj'];
+                    $this->xobjdict['IMGplain' . $img['iid']] = $this->cache[$img['key']]['plain']['obj'];
                 }
             } else {
-                $this->xobjdict['IMG'.$img['iid']] = $this->cache[$img['key']]['obj'];
+                $this->xobjdict['IMG' . $img['iid']] = $this->cache[$img['key']]['obj'];
             }
         }
         return $out;
@@ -203,51 +204,51 @@ abstract class Output
     protected function getOutImage(&$img, &$data, $sub = '')
     {
         $out = $this->getOutIcc($data)
-                .$this->getOutPalette($data)
-                .$this->getOutAltImages($img, $data, $sub);
+                . $this->getOutPalette($data)
+                . $this->getOutAltImages($img, $data, $sub);
 
         $data['obj'] = ++$this->pon;
 
-        $out .= $this->pon.' 0 obj'."\n"
-            .'<</Type /XObject'
-            .' /Subtype /Image'
-            .' /Width '.$data['width']
-            .' /Height '.$data['height']
-            .$this->getOutColorInfo($data);
+        $out .= $this->pon . ' 0 obj' . "\n"
+            . '<</Type /XObject'
+            . ' /Subtype /Image'
+            . ' /Width ' . $data['width']
+            . ' /Height ' . $data['height']
+            . $this->getOutColorInfo($data);
 
         if (!empty($data['exturl'])) {
             // external stream
             $out .= ' /Length 0'
-                .' /F << /FS /URL /F '.$this->enc->escapeDataString($data['exturl'], $this->pon).' >>';
+                . ' /F << /FS /URL /F ' . $this->enc->escapeDataString($data['exturl'], $this->pon) . ' >>';
             if (!empty($data['filter'])) {
-                $out .= ' /FFilter /'.$data['filter'];
+                $out .= ' /FFilter /' . $data['filter'];
             }
-            $out .= ' >> stream'."\n"
-                .'endstream'."\n";
+            $out .= ' >> stream' . "\n"
+                . 'endstream' . "\n";
         } else {
             if (!empty($data['filter'])) {
-                $out .= ' /Filter /'.$data['filter'];
+                $out .= ' /Filter /' . $data['filter'];
             }
             if (!empty($data['parms'])) {
-                $out .= ' '.$data['parms'];
+                $out .= ' ' . $data['parms'];
             }
 
             // Colour Key Masking
             if (!empty($data['trns'])) {
                 $trns = $this->getOutTransparency($data);
                 if (!empty($trns)) {
-                    $out .= ' /Mask [ '.$trns.']';
+                    $out .= ' /Mask [ ' . $trns . ']';
                 }
             }
 
             $stream = $this->enc->encryptString($data['data'], $this->pon);
-            $out .=' /Length '.strlen($stream)
-                .'>> stream'."\n"
-                .$stream."\n"
-                .'endstream'."\n";
+            $out .= ' /Length ' . strlen($stream)
+                . '>> stream' . "\n"
+                . $stream . "\n"
+                . 'endstream' . "\n";
         }
 
-        $out .= 'endobj'."\n";
+        $out .= 'endobj' . "\n";
 
         $this->cache[$img['key']]['out'] = true; // mark this as done
 
@@ -263,7 +264,7 @@ abstract class Output
     {
         $out = '';
         foreach ($this->xobjdict as $iid => $objid) {
-            $out .= ' /'.$iid.' '.$objid.' 0 R';
+            $out .= ' /' . $iid . ' ' . $objid . ' 0 R';
         }
         return $out;
     }
@@ -281,22 +282,22 @@ abstract class Output
             return '';
         }
         $data['obj_icc'] = ++$this->pon;
-        $out = $data['obj_icc'].' 0 obj'."\n"
-            .'<<'
-            .' /N '.$data['channels']
-            .' /Alternate /'.$data['colspace'];
+        $out = $data['obj_icc'] . ' 0 obj' . "\n"
+            . '<<'
+            . ' /N ' . $data['channels']
+            . ' /Alternate /' . $data['colspace'];
         $icc = $data['icc'];
         if ($this->compress) {
             $out .= ' /Filter /FlateDecode';
             $icc = gzcompress($icc);
         }
         $stream = $this->enc->encryptString($icc, $this->pon);
-        $out .= ' /Length '.strlen($stream)
-            .' >>'
-            .' stream'."\n"
-            .$stream."\n"
-            .'endstream'."\n"
-            .'endobj'."\n";
+        $out .= ' /Length ' . strlen($stream)
+            . ' >>'
+            . ' stream' . "\n"
+            . $stream . "\n"
+            . 'endstream' . "\n"
+            . 'endobj' . "\n";
         return $out;
     }
 
@@ -313,20 +314,20 @@ abstract class Output
             return '';
         }
         $data['obj_pal'] = ++$this->pon;
-        $out = $data['obj_pal'].' 0 obj'."\n"
-            .'<<';
+        $out = $data['obj_pal'] . ' 0 obj' . "\n"
+            . '<<';
         $pal = $data['pal'];
         if ($this->compress) {
             $out .= '/Filter /FlateDecode';
             $pal = gzcompress($pal);
         }
         $stream = $this->enc->encryptString($pal, $this->pon);
-        $out .= ' /Length '.strlen($stream)
-            .'>>'
-            .' stream'."\n"
-            .$stream."\n"
-            .'endstream'."\n"
-            .'endobj'."\n";
+        $out .= ' /Length ' . strlen($stream)
+            . '>>'
+            . ' stream' . "\n"
+            . $stream . "\n"
+            . 'endstream' . "\n"
+            . 'endobj' . "\n";
         return $out;
     }
 
@@ -343,28 +344,28 @@ abstract class Output
         // set color space
         if (!empty($data['obj_icc'])) {
             // ICC Colour Space
-            $out .= ' /ColorSpace [/ICCBased '.$data['obj_icc'].' 0 R]';
+            $out .= ' /ColorSpace [/ICCBased ' . $data['obj_icc'] . ' 0 R]';
         } elseif (!empty($data['obj_pal'])) {
             // Indexed Colour Space
             $out .= ' /ColorSpace [/Indexed /DeviceRGB '
-                .((strlen($data['pal']) / 3) - 1)
-                .' '.$data['obj_pal'].' 0 R]';
+                . ((strlen($data['pal']) / 3) - 1)
+                . ' ' . $data['obj_pal'] . ' 0 R]';
         } else {
             // Device Colour Space
-            $out .= ' /ColorSpace /'.$data['colspace'];
+            $out .= ' /ColorSpace /' . $data['colspace'];
         }
         if ($data['colspace'] == 'DeviceCMYK') {
             $out .= ' /Decode [1 0 1 0 1 0 1 0]';
         }
-        $out .= ' /BitsPerComponent '.$data['bits'];
+        $out .= ' /BitsPerComponent ' . $data['bits'];
 
         if (!$data['ismask'] && !empty($this->cache[$data['key']]['mask']['obj'])) {
-            $out .= ' /SMask '.$this->cache[$data['key']]['mask']['obj'].' 0 R';
+            $out .= ' /SMask ' . $this->cache[$data['key']]['mask']['obj'] . ' 0 R';
         }
 
         if (!empty($data['obj_alt'])) {
             // reference to alternate images dictionary
-            $out .= ' /Alternates '.$data['obj_alt'].' 0 R';
+            $out .= ' /Alternates ' . $data['obj_alt'] . ' 0 R';
         }
         return $out;
     }
@@ -386,18 +387,18 @@ abstract class Output
 
         $data['obj_alt'] = ++$this->pon;
 
-        $out = $this->pon.' 0 obj'."\n"
-            .'[';
+        $out = $this->pon . ' 0 obj' . "\n"
+            . '[';
         foreach ($img['altimgs'] as $iid) {
             if (!empty($this->cache[$this->image[$iid]['key']]['obj'])) {
                 $out .= ' <<'
-                    .' /Image '.$this->cache[$this->image[$iid]['key']]['obj'].' 0 R'
-                    .' /DefaultForPrinting '.(empty($this->image[$iid]['defprint']) ? 'false' : 'true')
-                    .' >>';
+                    . ' /Image ' . $this->cache[$this->image[$iid]['key']]['obj'] . ' 0 R'
+                    . ' /DefaultForPrinting ' . (empty($this->image[$iid]['defprint']) ? 'false' : 'true')
+                    . ' >>';
             }
         }
-        $out .= ' ]'."\n"
-            .'endobj'."\n";
+        $out .= ' ]' . "\n"
+            . 'endobj' . "\n";
 
         return $out;
     }
@@ -414,7 +415,7 @@ abstract class Output
         $trns = '';
         foreach ($data['trns'] as $idx => $val) {
             if ($val == 0) {
-                $trns .= $idx.' '.$idx.' ';
+                $trns .= $idx . ' ' . $idx . ' ';
             }
         }
         return $trns;
