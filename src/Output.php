@@ -209,7 +209,7 @@ abstract class Output
 
         $data['obj'] = ++$this->pon;
 
-        $out .= $this->pon . ' 0 obj' . "\n"
+        $out .= $data['obj'] . ' 0 obj' . "\n"
             . '<</Type /XObject'
             . ' /Subtype /Image'
             . ' /Width ' . $data['width']

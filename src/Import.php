@@ -121,7 +121,7 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
         $defprint = false,
         $altimgs = array()
     ) {
-        $data = $this->import($image, $width, $height, $ismask, $quality, $defprint);
+        $data = $this->import($image, $width, $height, $ismask, $quality);
         ++$this->iid;
         $this->image[$this->iid] = array(
             'iid'      => $this->iid,
