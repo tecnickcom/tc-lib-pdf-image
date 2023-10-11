@@ -377,7 +377,7 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
         }
         $img = imagecreatefromstring($data['raw']);
         $newimg = imagecreatetruecolor($width, $height);
-        imageinterlace($newimg, 0);
+        imageinterlace($newimg, false);
         imagealphablending($newimg, !$alpha);
         imagesavealpha($newimg, $alpha);
         imagecopyresampled($newimg, $img, 0, 0, 0, 0, $width, $height, $data['width'], $data['height']);
@@ -415,7 +415,7 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
     {
         $img = imagecreatefromstring($data['raw']);
         $newimg = imagecreate($data['width'], $data['height']);
-        imageinterlace($newimg, 0);
+        imageinterlace($newimg, false);
         // generate gray scale palette (0 -> 255)
         for ($col = 0; $col < 256; ++$col) {
             ImageColorAllocate($newimg, $col, $col, $col);

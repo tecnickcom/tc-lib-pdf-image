@@ -63,7 +63,7 @@ abstract class Output
     /**
      * Enable stream compression.
      *
-     * @var int
+     * @var bool
      */
     protected $compress = true;
 

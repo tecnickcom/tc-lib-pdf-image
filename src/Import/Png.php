@@ -7,7 +7,7 @@
  * @category    Library
  * @package     PdfImage
  * @author      Nicola Asuni <info@tecnick.com>
- * @copyright   2011-2023 Nicola Asuni - Tecnick.com LTD
+ * @copyright   2011-2015 Nicola Asuni - Tecnick.com LTD
  * @license     http://www.gnu.org/copyleft/lesser.html GNU-LGPL v3 (see LICENSE.TXT)
  * @link        https://github.com/tecnickcom/tc-lib-pdf-image
  *
@@ -26,7 +26,7 @@ use Com\Tecnick\Pdf\Image\Exception as ImageException;
  * @category    Library
  * @package     PdfImage
  * @author      Nicola Asuni <info@tecnick.com>
- * @copyright   2011-2023 Nicola Asuni - Tecnick.com LTD
+ * @copyright   2011-2016 Nicola Asuni - Tecnick.com LTD
  * @license     http://www.gnu.org/copyleft/lesser.html GNU-LGPL v3 (see LICENSE.TXT)
  * @link        https://github.com/tecnickcom/tc-lib-pdf-image
  */
@@ -56,11 +56,13 @@ class Png implements ImageImportInterface
 
         $data = $this->getIhdrChunk($data, $offset);
 
+        $offset += 3;
+
         // check compression, filter and interlacing settings
         if (
-            ($byte->getByte($offset++) != 0)
-            || ($byte->getByte($offset++) != 0)
-            || ($byte->getByte($offset++) != 0)
+            ($byte->getByte($offset - 3) != 0)
+            || ($byte->getByte($offset - 2) != 0)
+            || ($byte->getByte($offset - 1) != 0)
         ) {
             if (!empty($data['recoded'])) {
                 // this image has been already re-encoded
