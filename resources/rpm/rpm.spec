@@ -20,11 +20,11 @@ Requires:  php(language) >= 5.4.0
 Requires:  php-gd
 Requires:  php-zlib
 Requires:  php-composer(%{c_vendor}/tc-lib-file) < 2.0.0
-Requires:  php-composer(%{c_vendor}/tc-lib-file) >= 1.7.34
+Requires:  php-composer(%{c_vendor}/tc-lib-file) >= 1.7.35
 Requires:  php-composer(%{c_vendor}/tc-lib-color) < 2.0.0
-Requires:  php-composer(%{c_vendor}/tc-lib-color) >= 1.14.34
+Requires:  php-composer(%{c_vendor}/tc-lib-color) >= 1.14.35
 Requires:  php-composer(%{c_vendor}/tc-lib-pdf-encrypt) < 2.0.0
-Requires:  php-composer(%{c_vendor}/tc-lib-pdf-encrypt) >= 1.6.30
+Requires:  php-composer(%{c_vendor}/tc-lib-pdf-encrypt) >= 1.6.31
 
 Provides:  php-composer(%{c_vendor}/%{gh_project}) = %{version}
 Provides:  php-%{gh_project} = %{version}
