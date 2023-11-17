@@ -29,69 +29,17 @@ use Com\Tecnick\Pdf\Image\Exception as ImageException;
  * @copyright 2011-2016 Nicola Asuni - Tecnick.com LTD
  * @license   http://www.gnu.org/copyleft/lesser.html GNU-LGPL v3 (see LICENSE.TXT)
  * @link      https://github.com/tecnickcom/tc-lib-pdf-image
+ *
+ * @phpstan-import-type ImageBaseData from \Com\Tecnick\Pdf\Image\Import
  */
 class Png implements ImageImportInterface
 {
     /**
      * Extract data from a PNG image.
      *
-     * @param array{
-     *          'bits': int,
-     *          'channels': int,
-     *          'colspace': string,
-     *          'data': string,
-     *          'exturl': bool,
-     *          'file': string,
-     *          'filter': string,
-     *          'height': int,
-     *          'icc': string,
-     *          'ismask': bool,
-     *          'key': string,
-     *          'mapto': int,
-     *          'native': bool,
-     *          'obj': int,
-     *          'obj_alt': int,
-     *          'obj_icc': int,
-     *          'obj_pal': int,
-     *          'pal': string,
-     *          'parms': string,
-     *          'raw': string,
-     *          'recode': bool,
-     *          'recoded': bool,
-     *          'splitalpha': bool,
-     *          'trns': array<int, int>,
-     *          'type': int,
-     *          'width': int,
-     *        } $data Image raw data.
+     * @param ImageBaseData $data Image raw data.
      *
-     * @return array{
-     *          'bits': int,
-     *          'channels': int,
-     *          'colspace': string,
-     *          'data': string,
-     *          'exturl': bool,
-     *          'file': string,
-     *          'filter': string,
-     *          'height': int,
-     *          'icc': string,
-     *          'ismask': bool,
-     *          'key': string,
-     *          'mapto': int,
-     *          'native': bool,
-     *          'obj': int,
-     *          'obj_alt': int,
-     *          'obj_icc': int,
-     *          'obj_pal': int,
-     *          'pal': string,
-     *          'parms': string,
-     *          'raw': string,
-     *          'recode': bool,
-     *          'recoded': bool,
-     *          'splitalpha': bool,
-     *          'trns': array<int, int>,
-     *          'type': int,
-     *          'width': int,
-     *        } Image raw data array.
+     * @return ImageBaseData Image raw data array.
      */
     public function getData(array $data): array
     {
@@ -153,64 +101,10 @@ class Png implements ImageImportInterface
      * The header chunk (IHDR) contains basic information about the image data and must appear as the first chunk,
      * and there must only be one header chunk in a PNG data stream.
      *
-     * @param array{
-     *          'bits': int,
-     *          'channels': int,
-     *          'colspace': string,
-     *          'data': string,
-     *          'exturl': bool,
-     *          'file': string,
-     *          'filter': string,
-     *          'height': int,
-     *          'icc': string,
-     *          'ismask': bool,
-     *          'key': string,
-     *          'mapto': int,
-     *          'native': bool,
-     *          'obj': int,
-     *          'obj_alt': int,
-     *          'obj_icc': int,
-     *          'obj_pal': int,
-     *          'pal': string,
-     *          'parms': string,
-     *          'raw': string,
-     *          'recode': bool,
-     *          'recoded': bool,
-     *          'splitalpha': bool,
-     *          'trns': array<int, int>,
-     *          'type': int,
-     *          'width': int,
-     *        } $data   Image raw data.
+     * @param ImageBaseData $data   Image raw data.
      * @param int   $offset Current byte offset.
      *
-     * @return array{
-     *          'bits': int,
-     *          'channels': int,
-     *          'colspace': string,
-     *          'data': string,
-     *          'exturl': bool,
-     *          'file': string,
-     *          'filter': string,
-     *          'height': int,
-     *          'icc': string,
-     *          'ismask': bool,
-     *          'key': string,
-     *          'mapto': int,
-     *          'native': bool,
-     *          'obj': int,
-     *          'obj_alt': int,
-     *          'obj_icc': int,
-     *          'obj_pal': int,
-     *          'pal': string,
-     *          'parms': string,
-     *          'raw': string,
-     *          'recode': bool,
-     *          'recoded': bool,
-     *          'splitalpha': bool,
-     *          'trns': array<int, int>,
-     *          'type': int,
-     *          'width': int,
-     *        } Image raw data array.
+     * @return ImageBaseData Image raw data array.
      */
     protected function getIhdrChunk(array $data, int &$offset): array
     {
@@ -252,64 +146,10 @@ class Png implements ImageImportInterface
     /**
      * Extract chunks data from a PNG image.
      *
-     * @param array{
-     *          'bits': int,
-     *          'channels': int,
-     *          'colspace': string,
-     *          'data': string,
-     *          'exturl': bool,
-     *          'file': string,
-     *          'filter': string,
-     *          'height': int,
-     *          'icc': string,
-     *          'ismask': bool,
-     *          'key': string,
-     *          'mapto': int,
-     *          'native': bool,
-     *          'obj': int,
-     *          'obj_alt': int,
-     *          'obj_icc': int,
-     *          'obj_pal': int,
-     *          'pal': string,
-     *          'parms': string,
-     *          'raw': string,
-     *          'recode': bool,
-     *          'recoded': bool,
-     *          'splitalpha': bool,
-     *          'trns': array<int, int>,
-     *          'type': int,
-     *          'width': int,
-     *        } $data   Image raw data.
+     * @param ImageBaseData $data   Image raw data.
      * @param int   $offset Current byte offset.
      *
-     * @return array{
-     *          'bits': int,
-     *          'channels': int,
-     *          'colspace': string,
-     *          'data': string,
-     *          'exturl': bool,
-     *          'file': string,
-     *          'filter': string,
-     *          'height': int,
-     *          'icc': string,
-     *          'ismask': bool,
-     *          'key': string,
-     *          'mapto': int,
-     *          'native': bool,
-     *          'obj': int,
-     *          'obj_alt': int,
-     *          'obj_icc': int,
-     *          'obj_pal': int,
-     *          'pal': string,
-     *          'parms': string,
-     *          'raw': string,
-     *          'recode': bool,
-     *          'recoded': bool,
-     *          'splitalpha': bool,
-     *          'trns': array<int, int>,
-     *          'type': int,
-     *          'width': int,
-     *        } Image raw data array.
+     * @return ImageBaseData Image raw data array.
      */
     protected function getChunks(array $data, int $offset): array
     {
@@ -351,65 +191,11 @@ class Png implements ImageImportInterface
      * The palette chunk (PLTE) stores the colormap data associated with the image data.
      * This chunk is presentonly if the image data uses a color palette and must appear before the image data chunk.
      *
-     * @param array{
-     *          'bits': int,
-     *          'channels': int,
-     *          'colspace': string,
-     *          'data': string,
-     *          'exturl': bool,
-     *          'file': string,
-     *          'filter': string,
-     *          'height': int,
-     *          'icc': string,
-     *          'ismask': bool,
-     *          'key': string,
-     *          'mapto': int,
-     *          'native': bool,
-     *          'obj': int,
-     *          'obj_alt': int,
-     *          'obj_icc': int,
-     *          'obj_pal': int,
-     *          'pal': string,
-     *          'parms': string,
-     *          'raw': string,
-     *          'recode': bool,
-     *          'recoded': bool,
-     *          'splitalpha': bool,
-     *          'trns': array<int, int>,
-     *          'type': int,
-     *          'width': int,
-     *        } $data   Image raw data.
+     * @param ImageBaseData $data   Image raw data.
      * @param int   $offset Current byte offset.
      * @param int   $len    NUmber of bytes in this chunk.
      *
-     * @return array{
-     *          'bits': int,
-     *          'channels': int,
-     *          'colspace': string,
-     *          'data': string,
-     *          'exturl': bool,
-     *          'file': string,
-     *          'filter': string,
-     *          'height': int,
-     *          'icc': string,
-     *          'ismask': bool,
-     *          'key': string,
-     *          'mapto': int,
-     *          'native': bool,
-     *          'obj': int,
-     *          'obj_alt': int,
-     *          'obj_icc': int,
-     *          'obj_pal': int,
-     *          'pal': string,
-     *          'parms': string,
-     *          'raw': string,
-     *          'recode': bool,
-     *          'recoded': bool,
-     *          'splitalpha': bool,
-     *          'trns': array<int, int>,
-     *          'type': int,
-     *          'width': int,
-     *        } Image raw data array.
+     * @return ImageBaseData Image raw data array.
      */
     protected function getPlteChunk(array $data, int &$offset, int $len): array
     {
@@ -422,65 +208,11 @@ class Png implements ImageImportInterface
     /**
      * Extract the tRNS chunk data.
      *
-     * @param array{
-     *          'bits': int,
-     *          'channels': int,
-     *          'colspace': string,
-     *          'data': string,
-     *          'exturl': bool,
-     *          'file': string,
-     *          'filter': string,
-     *          'height': int,
-     *          'icc': string,
-     *          'ismask': bool,
-     *          'key': string,
-     *          'mapto': int,
-     *          'native': bool,
-     *          'obj': int,
-     *          'obj_alt': int,
-     *          'obj_icc': int,
-     *          'obj_pal': int,
-     *          'pal': string,
-     *          'parms': string,
-     *          'raw': string,
-     *          'recode': bool,
-     *          'recoded': bool,
-     *          'splitalpha': bool,
-     *          'trns': array<int, int>,
-     *          'type': int,
-     *          'width': int,
-     *        } $data   Image raw data.
+     * @param ImageBaseData $data   Image raw data.
      * @param int   $offset Current byte offset.
      * @param int   $len    NUmber of bytes in this chunk.
      *
-     * @return array{
-     *          'bits': int,
-     *          'channels': int,
-     *          'colspace': string,
-     *          'data': string,
-     *          'exturl': bool,
-     *          'file': string,
-     *          'filter': string,
-     *          'height': int,
-     *          'icc': string,
-     *          'ismask': bool,
-     *          'key': string,
-     *          'mapto': int,
-     *          'native': bool,
-     *          'obj': int,
-     *          'obj_alt': int,
-     *          'obj_icc': int,
-     *          'obj_pal': int,
-     *          'pal': string,
-     *          'parms': string,
-     *          'raw': string,
-     *          'recode': bool,
-     *          'recoded': bool,
-     *          'splitalpha': bool,
-     *          'trns': array<int, int>,
-     *          'type': int,
-     *          'width': int,
-     *        } Image raw data array.
+     * @return ImageBaseData Image raw data array.
      */
     protected function getTrnsChunk(array $data, int &$offset, int $len): array
     {
@@ -510,65 +242,11 @@ class Png implements ImageImportInterface
      * The image data chunk (IDAT) stores the actual image data,
      * and multiple image data chunks may occur in a data stream and must be stored in contiguous order.
      *
-     * @param array{
-     *          'bits': int,
-     *          'channels': int,
-     *          'colspace': string,
-     *          'data': string,
-     *          'exturl': bool,
-     *          'file': string,
-     *          'filter': string,
-     *          'height': int,
-     *          'icc': string,
-     *          'ismask': bool,
-     *          'key': string,
-     *          'mapto': int,
-     *          'native': bool,
-     *          'obj': int,
-     *          'obj_alt': int,
-     *          'obj_icc': int,
-     *          'obj_pal': int,
-     *          'pal': string,
-     *          'parms': string,
-     *          'raw': string,
-     *          'recode': bool,
-     *          'recoded': bool,
-     *          'splitalpha': bool,
-     *          'trns': array<int, int>,
-     *          'type': int,
-     *          'width': int,
-     *        } $data   Image raw data.
+     * @param ImageBaseData $data   Image raw data.
      * @param int   $offset Current byte offset.
      * @param int   $len    NUmber of bytes in this chunk.
      *
-     * @return array{
-     *          'bits': int,
-     *          'channels': int,
-     *          'colspace': string,
-     *          'data': string,
-     *          'exturl': bool,
-     *          'file': string,
-     *          'filter': string,
-     *          'height': int,
-     *          'icc': string,
-     *          'ismask': bool,
-     *          'key': string,
-     *          'mapto': int,
-     *          'native': bool,
-     *          'obj': int,
-     *          'obj_alt': int,
-     *          'obj_icc': int,
-     *          'obj_pal': int,
-     *          'pal': string,
-     *          'parms': string,
-     *          'raw': string,
-     *          'recode': bool,
-     *          'recoded': bool,
-     *          'splitalpha': bool,
-     *          'trns': array<int, int>,
-     *          'type': int,
-     *          'width': int,
-     *        } Image raw data array.
+     * @return ImageBaseData Image raw data array.
      */
     protected function getIdatChunk(array $data, int &$offset, int $len): array
     {
@@ -582,65 +260,11 @@ class Png implements ImageImportInterface
      * Extract the iCCP chunk data.
      *
      * @param Byte  $byte   Byte class object.
-     * @param array{
-     *          'bits': int,
-     *          'channels': int,
-     *          'colspace': string,
-     *          'data': string,
-     *          'exturl': bool,
-     *          'file': string,
-     *          'filter': string,
-     *          'height': int,
-     *          'icc': string,
-     *          'ismask': bool,
-     *          'key': string,
-     *          'mapto': int,
-     *          'native': bool,
-     *          'obj': int,
-     *          'obj_alt': int,
-     *          'obj_icc': int,
-     *          'obj_pal': int,
-     *          'pal': string,
-     *          'parms': string,
-     *          'raw': string,
-     *          'recode': bool,
-     *          'recoded': bool,
-     *          'splitalpha': bool,
-     *          'trns': array<int, int>,
-     *          'type': int,
-     *          'width': int,
-     *        } $data   Image raw data.
+     * @param ImageBaseData $data   Image raw data.
      * @param int   $offset Current byte offset.
      * @param int   $len    NUmber of bytes in this chunk.
      *
-     * @return array{
-     *          'bits': int,
-     *          'channels': int,
-     *          'colspace': string,
-     *          'data': string,
-     *          'exturl': bool,
-     *          'file': string,
-     *          'filter': string,
-     *          'height': int,
-     *          'icc': string,
-     *          'ismask': bool,
-     *          'key': string,
-     *          'mapto': int,
-     *          'native': bool,
-     *          'obj': int,
-     *          'obj_alt': int,
-     *          'obj_icc': int,
-     *          'obj_pal': int,
-     *          'pal': string,
-     *          'parms': string,
-     *          'raw': string,
-     *          'recode': bool,
-     *          'recoded': bool,
-     *          'splitalpha': bool,
-     *          'trns': array<int, int>,
-     *          'type': int,
-     *          'width': int,
-     *        } Image raw data array.
+     * @return ImageBaseData Image raw data array.
      */
     protected function getIccpChunk(
         Byte $byte,

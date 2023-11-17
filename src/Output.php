@@ -29,6 +29,9 @@ use Com\Tecnick\Pdf\Image\Exception as ImageException;
  * @copyright 2011-2023 Nicola Asuni - Tecnick.com LTD
  * @license   http://www.gnu.org/copyleft/lesser.html GNU-LGPL v3 (see LICENSE.TXT)
  * @link      https://github.com/tecnickcom/tc-lib-pdf-image
+ *
+ * @phpstan-import-type ImageBaseData from \Com\Tecnick\Pdf\Image\Import
+ * @phpstan-import-type ImageRawData from \Com\Tecnick\Pdf\Image\Import
  */
 abstract class Output
 {
@@ -62,90 +65,7 @@ abstract class Output
      * Cache used to store imported image data.
      * The same image data can be reused multiple times.
      *
-     * @var array<string, array{
-     *          'bits': int,
-     *          'channels': int,
-     *          'colspace': string,
-     *          'data': string,
-     *          'exturl': bool,
-     *          'file': string,
-     *          'filter': string,
-     *          'height': int,
-     *          'icc': string,
-     *          'ismask': bool,
-     *          'key': string,
-     *          'mapto': int,
-     *          'mask'?: array{
-     *              'bits': int,
-     *              'channels': int,
-     *              'colspace': string,
-     *              'data': string,
-     *              'exturl': bool,
-     *              'file': string,
-     *              'filter': string,
-     *              'height': int,
-     *              'icc': string,
-     *              'ismask': bool,
-     *              'key': string,
-     *              'mapto': int,
-     *              'native': bool,
-     *              'obj': int,
-     *              'obj_alt': int,
-     *              'obj_icc': int,
-     *              'obj_pal': int,
-     *              'pal': string,
-     *              'parms': string,
-     *              'raw': string,
-     *              'recode': bool,
-     *              'recoded': bool,
-     *              'splitalpha': bool,
-     *              'trns': array<int, int>,
-     *              'type': int,
-     *              'width': int,
-     *          },
-     *          'native': bool,
-     *          'obj': int,
-     *          'obj_alt': int,
-     *          'obj_icc': int,
-     *          'obj_pal': int,
-     *          'pal': string,
-     *          'parms': string,
-     *          'plain'?: array{
-     *              'bits': int,
-     *              'channels': int,
-     *              'colspace': string,
-     *              'data': string,
-     *              'exturl': bool,
-     *              'file': string,
-     *              'filter': string,
-     *              'height': int,
-     *              'icc': string,
-     *              'ismask': bool,
-     *              'key': string,
-     *              'mapto': int,
-     *              'native': bool,
-     *              'obj': int,
-     *              'obj_alt': int,
-     *              'obj_icc': int,
-     *              'obj_pal': int,
-     *              'pal': string,
-     *              'parms': string,
-     *              'raw': string,
-     *              'recode': bool,
-     *              'recoded': bool,
-     *              'splitalpha': bool,
-     *              'trns': array<int, int>,
-     *              'type': int,
-     *              'width': int,
-     *          },
-     *          'raw': string,
-     *          'recode': bool,
-     *          'recoded': bool,
-     *          'splitalpha': bool,
-     *          'trns': array<int, int>,
-     *          'type': int,
-     *          'width': int,
-     *      }>
+     * @var array<string, ImageRawData>
      */
     protected array $cache = [];
 
@@ -270,26 +190,7 @@ abstract class Output
      *          'defprint': bool,
      *          'altimgs'?: array<int, int>,
      *      }  $img  Image reference.
-     * @param array{
-     *        'bits': int,
-     *        'channels': int,
-     *        'colspace': string,
-     *        'data': string,
-     *        'exturl': bool,
-     *        'filter': string,
-     *        'height': int,
-     *        'icc': string,
-     *        'ismask': bool,
-     *        'key': string,
-     *        'obj': int,
-     *        'obj_alt': int,
-     *        'obj_icc': int,
-     *        'obj_pal': int,
-     *        'pal': string,
-     *        'parms': string,
-     *        'trns': array<int, int>,
-     *        'width': int,
-     *        }  $data Image raw data.
+     * @param ImageBaseData  $data Image raw data.
      * @param string $sub  Sub image ('mask', 'plain' or empty string).
      *
      * @return string PDF Image object.
