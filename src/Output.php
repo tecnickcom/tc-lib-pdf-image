@@ -99,22 +99,22 @@ abstract class Output
     /**
      * Get the PDF output string to print the specified image ID.
      *
-     * @param int $iid        Image ID.
-     * @param int $xpos       Abscissa (X coordinate) of the upper-left Image corner.
-     * @param int $ypos       Ordinate (Y coordinate) of the upper-left Image corner.
-     * @param int $width      Image width in user units.
-     * @param int $height     Image height in user units.
-     * @param int $pageheight Page height in user units.
+     * @param int   $iid        Image ID.
+     * @param float $xpos       Abscissa (X coordinate) of the upper-left Image corner in user units.
+     * @param float $ypos       Ordinate (Y coordinate) of the upper-left Image corner in user units.
+     * @param float $width      Image width in user units.
+     * @param float $height     Image height in user units.
+     * @param float $pageheight Page height in user units.
      *
      * @return string Image PDF page content.
      */
     public function getSetImage(
         int $iid,
-        int $xpos,
-        int $ypos,
-        int $width,
-        int $height,
-        int $pageheight
+        float $xpos,
+        float $ypos,
+        float $width,
+        float $height,
+        float $pageheight
     ): string {
         if (empty($this->image[$iid])) {
             throw new ImageException('Unknown image ID: ' . $iid);

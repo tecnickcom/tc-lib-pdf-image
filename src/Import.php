@@ -149,8 +149,8 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
      * @param string          $image    Image file name, URL or a '@' character followed by the image data string.
      *                                  To link an image without embedding it on the document, set an asterisk
      *                                  character before the URL (i.e.: '*http://www.example.com/image.jpg').
-     * @param int             $width    New width in pixels or null to keep the original value.
-     * @param int             $height   New height in pixels or null to keep the original value.
+     * @param ?int            $width    New width in pixels or null to keep the original value.
+     * @param ?int            $height   New height in pixels or null to keep the original value.
      * @param bool            $ismask   True if the image is a transparency mask.
      * @param int             $quality  Quality for JPEG files (0 = max compression; 100 = best quality, bigger file).
      * @param bool            $defprint Indicate if the image is the default
@@ -161,8 +161,8 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
      */
     public function add(
         string $image,
-        int $width = null,
-        int $height = null,
+        ?int $width = null,
+        ?int $height = null,
         bool $ismask = false,
         int $quality = 100,
         bool $defprint = false,
@@ -229,8 +229,8 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
      * @param string $image   Image file name, URL or a '@' character followed by the image data string.
      *                        To link an image without embedding it on the document, set an asterisk
      *                        character before the URL (i.e.: '*http://www.example.com/image.jpg').
-     * @param int    $width   New width in pixels or null to keep the original value.
-     * @param int    $height  New height in pixels or null to keep the original value.
+     * @param ?int   $width   New width in pixels or null to keep the original value.
+     * @param ?int   $height  New height in pixels or null to keep the original value.
      * @param bool   $ismask  True if the image is a transparency mask.
      * @param int    $quality Quality for JPEG files (0 = max compression; 100 = best quality, bigger file).
      *
