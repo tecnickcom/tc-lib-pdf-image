@@ -128,16 +128,16 @@ abstract class Output
             ($xpos * $this->kunit),
             (($pageheight - $ypos - $height) * $this->kunit) // reverse coordinate
         );
-        if (! empty($this->cache[$this->image[$iid]['key']]['mask'])) {
-            $out .= ' /IMGmask' . $iid . ' Do';
-            if (! empty($this->cache[$this->image[$iid]['key']]['plain'])) {
-                $out .= ' /IMGplain' . $iid . ' Do';
-            }
-        } else {
-            $out .= ' /IMG' . $iid . ' Do';
+
+        if (empty($this->cache[$this->image[$iid]['key']]['mask'])) {
+            return $out . ' /IMG' . $iid . ' Do' . ' Q';
         }
 
-        return $out . ' Q';
+        if (empty($this->cache[$this->image[$iid]['key']]['plain'])) {
+            return $out . ' /IMGmask' . $iid . ' Do' . ' Q';
+        }
+
+        return $out . ' /IMGplain' . $iid . ' Do' . ' Q';
     }
 
     /**
@@ -153,26 +153,26 @@ abstract class Output
         $out = '';
         foreach ($this->image as $iid => $img) {
             if (empty($this->cache[$img['key']]['out'])) {
-                if (! empty($this->cache[$img['key']]['mask'])) {
+                if (empty($this->cache[$img['key']]['mask'])) {
+                    $out .= $this->getOutImage($img, $this->cache[$img['key']]);
+                } else {
                     $out .= $this->getOutImage($img, $this->cache[$img['key']]['mask'], 'mask');
-                    if (! empty($this->cache[$img['key']]['plain'])) {
+                    if (!empty($this->cache[$img['key']]['plain'])) {
                         $out .= $this->getOutImage($img, $this->cache[$img['key']]['plain'], 'plain');
                     }
-                } else {
-                    $out .= $this->getOutImage($img, $this->cache[$img['key']]);
                 }
 
                 $this->image[$iid] = $img;
             }
 
-            if (! empty($this->cache[$img['key']]['mask']['obj'])) {
-                // the mask image must be omitted
-                // $this->xobjdict['IMGmask'.$img['iid']] = $this->cache[$img['key']]['mask']['obj'];
-                if (! empty($this->cache[$img['key']]['plain']['obj'])) {
+            if (empty($this->cache[$img['key']]['mask']['obj'])) {
+                $this->xobjdict['IMG' . $img['iid']] = $this->cache[$img['key']]['obj'];
+            } else {
+                if (empty($this->cache[$img['key']]['plain']['obj'])) {
+                    $this->xobjdict['IMGmask' . $img['iid']] = $this->cache[$img['key']]['mask']['obj'];
+                } else {
                     $this->xobjdict['IMGplain' . $img['iid']] = $this->cache[$img['key']]['plain']['obj'];
                 }
-            } else {
-                $this->xobjdict['IMG' . $img['iid']] = $this->cache[$img['key']]['obj'];
             }
         }
 
@@ -207,7 +207,8 @@ abstract class Output
         $data['obj'] = ++$this->pon;
 
         $out .= $data['obj'] . ' 0 obj' . "\n"
-            . '<</Type /XObject'
+            . '<<'
+            . ' /Type /XObject'
             . ' /Subtype /Image'
             . ' /Width ' . $data['width']
             . ' /Height ' . $data['height']
@@ -215,14 +216,16 @@ abstract class Output
 
         if (! empty($data['exturl'])) {
             // external stream
-            $out .= ' /Length 0 /F << /FS /URL /F '
-            . $this->encrypt->escapeDataString($data['exturl'], $this->pon) . ' >>';
+            $out .= ' /Length 0 /F'
+            . ' <<'
+            . ' /FS /URL /F '
+            . $this->encrypt->escapeDataString($data['exturl'], $this->pon)
+            . ' >>';
             if (! empty($data['filter'])) {
                 $out .= ' /FFilter /' . $data['filter'];
             }
 
-            $out .= ' >> stream' . "\n"
-                . 'endstream' . "\n";
+            $out .= ' >>' . "\n";
         } else {
             if (! empty($data['filter'])) {
                 $out .= ' /Filter /' . $data['filter'];

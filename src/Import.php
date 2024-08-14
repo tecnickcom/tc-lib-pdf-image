@@ -452,6 +452,7 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
      * @return ImageRawData Image raw data array.
      *
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings(PHPMD.NPathComplexity)
      */
     protected function getResizedRawData(
         array $data,
@@ -475,34 +476,40 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
         }
 
         imageinterlace($newimg, false);
-        imagealphablending($newimg, ! $alpha);
-        imagesavealpha($newimg, $alpha);
-        imagecopyresampled($newimg, $img, 0, 0, 0, 0, $width, $height, $data['width'], $data['height']);
-        ob_start();
-        if ($data['mapto'] == IMAGETYPE_PNG) {
-            if (
-                (($tid = imagecolortransparent($img)) >= 0)
-                && (($palsize = imagecolorstotal($img)) > 0)
-                && ($tid < $palsize)
-            ) {
+
+        if ($alpha) {
+            $trid = imagecolorallocate($newimg, 0, 0, 0);
+            if ($trid === false) {
+                throw new ImageException('Unable to allocate alpha color for transparency');
+            }
+            imagecolortransparent($newimg, $trid);
+        } else {
+            $tid = imagecolortransparent($img);
+            $palsize = imagecolorstotal($img);
+            if (($tid >= 0) && ($palsize > 0) && ($tid < $palsize)) {
                 // set transparency for Indexed image
                 $tcol = imagecolorsforindex($img, $tid);
-                $tid = imagecolorallocate($newimg, $tcol['red'], $tcol['green'], $tcol['blue']);
-                if ($tid === false) {
+                $trid = imagecolorallocate($newimg, $tcol['red'], $tcol['green'], $tcol['blue']);
+                if ($trid === false) {
                     throw new ImageException('Unable to allocate color for transparency');
                 }
-
-                imagefill($newimg, 0, 0, $tid);
-                imagecolortransparent($newimg, $tid);
+                imagefill($newimg, 0, 0, $trid);
+                imagecolortransparent($newimg, $trid);
             }
+        }
 
+        imagealphablending($newimg, ! $alpha);
+        imagesavealpha($newimg, $alpha);
+
+        imagecopyresampled($newimg, $img, 0, 0, 0, 0, $width, $height, $data['width'], $data['height']);
+
+        ob_start();
+        if ($data['mapto'] == IMAGETYPE_PNG) {
             imagepng($newimg, null, 9, PNG_ALL_FILTERS);
         } else {
             imagejpeg($newimg, null, $quality);
         }
-
         $ogc = ob_get_clean();
-
         if ($ogc === false) {
             throw new ImageException('Unable to extract alpha channel');
         }
@@ -533,9 +540,10 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
         }
 
         imageinterlace($newimg, false);
+
         // generate gray scale palette (0 -> 255)
         for ($col = 0; $col < 256; ++$col) {
-            ImageColorAllocate($newimg, $col, $col, $col);
+            imagecolorallocate($newimg, $col, $col, $col);
         }
 
         // extract alpha channel
