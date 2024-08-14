@@ -130,14 +130,14 @@ abstract class Output
         );
 
         if (empty($this->cache[$this->image[$iid]['key']]['mask'])) {
-            return $out . ' /IMG' . $iid . ' Do' . ' Q';
+            return $out . ' /IMG' . $iid . ' Do Q' . "\n";
         }
 
         if (empty($this->cache[$this->image[$iid]['key']]['plain'])) {
-            return $out . ' /IMGmask' . $iid . ' Do' . ' Q';
+            return $out . ' /IMGmask' . $iid . ' Do Q' . "\n";
         }
 
-        return $out . ' /IMGplain' . $iid . ' Do' . ' Q';
+        return $out . ' /IMGplain' . $iid . ' Do Q' . "\n";
     }
 
     /**

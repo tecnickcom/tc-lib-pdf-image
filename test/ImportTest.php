@@ -86,55 +86,55 @@ class ImportTest extends TestUtil
         $import = $this->getTestObject();
         $iid = $import->add(__DIR__ . '/images/200x100_RGB.png');
         $this->assertEquals(
-            'q 150.000000 0 0 75.000000 2.250000 371.250000 cm /IMG1 Do Q',
+            'q 150.000000 0 0 75.000000 2.250000 371.250000 cm /IMG1 Do Q' . "\n",
             $import->getSetImage($iid, 3, 5, 200, 100, 600)
         );
 
         $iid = $import->add(__DIR__ . '/images/200x100_GRAY.jpg');
         $this->assertEquals(
-            'q 150.000000 0 0 75.000000 2.250000 371.250000 cm /IMG2 Do Q',
+            'q 150.000000 0 0 75.000000 2.250000 371.250000 cm /IMG2 Do Q' . "\n",
             $import->getSetImage($iid, 3, 5, 200, 100, 600)
         );
 
         $iid = $import->add(__DIR__ . '/images/200x100_GRAY.png');
         $this->assertEquals(
-            'q 150.000000 0 0 75.000000 2.250000 371.250000 cm /IMG3 Do Q',
+            'q 150.000000 0 0 75.000000 2.250000 371.250000 cm /IMG3 Do Q' . "\n",
             $import->getSetImage($iid, 3, 5, 200, 100, 600)
         );
 
         $iid = $import->add(__DIR__ . '/images/200x100_INDEX16.png');
         $this->assertEquals(
-            'q 150.000000 0 0 75.000000 2.250000 371.250000 cm /IMG4 Do Q',
+            'q 150.000000 0 0 75.000000 2.250000 371.250000 cm /IMG4 Do Q' . "\n",
             $import->getSetImage($iid, 3, 5, 200, 100, 600)
         );
 
         $iid = $import->add(__DIR__ . '/images/200x100_INDEX256.png');
         $this->assertEquals(
-            'q 150.000000 0 0 75.000000 2.250000 371.250000 cm /IMG5 Do Q',
+            'q 150.000000 0 0 75.000000 2.250000 371.250000 cm /IMG5 Do Q' . "\n",
             $import->getSetImage($iid, 3, 5, 200, 100, 600)
         );
 
         $iid = $import->add(__DIR__ . '/images/200x100_RGB.jpg');
         $this->assertEquals(
-            'q 150.000000 0 0 75.000000 2.250000 371.250000 cm /IMG6 Do Q',
+            'q 150.000000 0 0 75.000000 2.250000 371.250000 cm /IMG6 Do Q' . "\n",
             $import->getSetImage($iid, 3, 5, 200, 100, 600)
         );
 
         $iid = $import->add(__DIR__ . '/images/200x100_RGB.png');
         $this->assertEquals(
-            'q 150.000000 0 0 75.000000 2.250000 371.250000 cm /IMG7 Do Q',
+            'q 150.000000 0 0 75.000000 2.250000 371.250000 cm /IMG7 Do Q' . "\n",
             $import->getSetImage($iid, 3, 5, 200, 100, 600)
         );
 
         $iid = $import->add(__DIR__ . '/images/200x100_RGBALPHA.png');
         $this->assertEquals(
-            'q 150.000000 0 0 75.000000 2.250000 371.250000 cm /IMGplain8 Do Q',
+            'q 150.000000 0 0 75.000000 2.250000 371.250000 cm /IMGplain8 Do Q' . "\n",
             $import->getSetImage($iid, 3, 5, 200, 100, 600)
         );
 
         $iid = $import->add(__DIR__ . '/images/200x100_INDEXALPHA.png');
         $this->assertEquals(
-            'q 150.000000 0 0 75.000000 2.250000 371.250000 cm /IMG9 Do Q',
+            'q 150.000000 0 0 75.000000 2.250000 371.250000 cm /IMG9 Do Q' . "\n",
             $import->getSetImage($iid, 3, 5, 200, 100, 600)
         );
 
@@ -142,25 +142,25 @@ class ImportTest extends TestUtil
 
         $iid = $import->add(__DIR__ . '/images/200x100_RGB.png', 100, 50, true, 75, true);
         $this->assertEquals(
-            'q 75.000000 0 0 37.500000 2.250000 408.750000 cm /IMGmask10 Do Q',
+            'q 75.000000 0 0 37.500000 2.250000 408.750000 cm /IMGmask10 Do Q' . "\n",
             $import->getSetImage($iid, 3, 5, 100, 50, 600)
         );
 
         $iid = $import->add(__DIR__ . '/images/200x100_RGBALPHA.png', 100, 50, true, 75, true);
         $this->assertEquals(
-            'q 75.000000 0 0 37.500000 2.250000 408.750000 cm /IMGmask11 Do Q',
+            'q 75.000000 0 0 37.500000 2.250000 408.750000 cm /IMGmask11 Do Q' . "\n",
             $import->getSetImage($iid, 3, 5, 100, 50, 600)
         );
 
         $iid = $import->add(__DIR__ . '/images/200x100_INDEXALPHA.png', 100, 50, true, 75, true);
         $this->assertEquals(
-            'q 75.000000 0 0 37.500000 2.250000 408.750000 cm /IMGmask12 Do Q',
+            'q 75.000000 0 0 37.500000 2.250000 408.750000 cm /IMGmask12 Do Q' . "\n",
             $import->getSetImage($iid, 3, 5, 100, 50, 600)
         );
 
         $iid = $import->add(__DIR__ . '/images/200x100_RGB.jpg', 100, 50, false, 75, true, [1, 2, 3]);
         $this->assertEquals(
-            'q 75.000000 0 0 37.500000 2.250000 408.750000 cm /IMG13 Do Q',
+            'q 75.000000 0 0 37.500000 2.250000 408.750000 cm /IMG13 Do Q' . "\n",
             $import->getSetImage($iid, 3, 5, 100, 50, 600)
         );
 
@@ -168,25 +168,25 @@ class ImportTest extends TestUtil
 
         $iid = $import->add(__DIR__ . '/images/200x100_RGBICC.png');
         $this->assertEquals(
-            'q 150.000000 0 0 75.000000 2.250000 371.250000 cm /IMG14 Do Q',
+            'q 150.000000 0 0 75.000000 2.250000 371.250000 cm /IMG14 Do Q' . "\n",
             $import->getSetImage($iid, 3, 5, 200, 100, 600)
         );
 
         $iid = $import->add(__DIR__ . '/images/200x100_RGBICC.jpg');
         $this->assertEquals(
-            'q 150.000000 0 0 75.000000 2.250000 371.250000 cm /IMG15 Do Q',
+            'q 150.000000 0 0 75.000000 2.250000 371.250000 cm /IMG15 Do Q' . "\n",
             $import->getSetImage($iid, 3, 5, 200, 100, 600)
         );
 
         $iid = $import->add(__DIR__ . '/images/200x100_RGBINT.png');
         $this->assertEquals(
-            'q 150.000000 0 0 75.000000 2.250000 371.250000 cm /IMGplain16 Do Q',
+            'q 150.000000 0 0 75.000000 2.250000 371.250000 cm /IMGplain16 Do Q' . "\n",
             $import->getSetImage($iid, 3, 5, 200, 100, 600)
         );
 
         $iid = $import->add(__DIR__ . '/images/200x100_CMYK.jpg');
         $this->assertEquals(
-            'q 150.000000 0 0 75.000000 2.250000 371.250000 cm /IMG17 Do Q',
+            'q 150.000000 0 0 75.000000 2.250000 371.250000 cm /IMG17 Do Q' . "\n",
             $import->getSetImage($iid, 3, 5, 200, 100, 600)
         );
 
@@ -196,14 +196,14 @@ class ImportTest extends TestUtil
 
         $iid = $import->add('@' . $data['raw']);
         $this->assertEquals(
-            'q 150.000000 0 0 75.000000 2.250000 371.250000 cm /IMG18 Do Q',
+            'q 150.000000 0 0 75.000000 2.250000 371.250000 cm /IMG18 Do Q' . "\n",
             $import->getSetImage($iid, 3, 5, 200, 100, 600)
         );
 
         // disabled because of libpngerror
         // $iid = $testObj->add('*http://localhost:8000/200x100_INDEX16.png');
         // $this->assertEquals(
-        //     'q 150.000000 0 0 75.000000 2.250000 371.250000 cm /IMG18 Do Q',
+        //     'q 150.000000 0 0 75.000000 2.250000 371.250000 cm /IMG18 Do Q' . "\n",
         //     $testObj->getSetImage($iid, 3, 5, 200, 100, 600)
         // );
 
