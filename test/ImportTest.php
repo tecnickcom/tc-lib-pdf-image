@@ -221,5 +221,11 @@ class ImportTest extends TestUtil
             . ' /IMG15 31 0 R /IMGplain16 33 0 R /IMG17 35 0 R /IMG18 37 0 R',
             $xobjectDict
         );
+
+        $xdByKeys = $import->getXobjectDictByKeys([2,3]);
+        $this->assertEquals(
+            ' /IMG2 12 0 R /IMG3 13 0 R',
+            $xdByKeys
+        );
     }
 }

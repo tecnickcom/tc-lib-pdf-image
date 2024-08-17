@@ -32,6 +32,8 @@ use Com\Tecnick\Pdf\Image\Exception as ImageException;
  *
  * @phpstan-import-type ImageBaseData from \Com\Tecnick\Pdf\Image\Import
  * @phpstan-import-type ImageRawData from \Com\Tecnick\Pdf\Image\Import
+ *
+ * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
  */
 abstract class Output
 {
@@ -265,6 +267,40 @@ abstract class Output
         $out = '';
         foreach ($this->xobjdict as $iid => $objid) {
             $out .= ' /' . $iid . ' ' . $objid . ' 0 R';
+        }
+
+        return $out;
+    }
+
+    /**
+     * Return XObjects Dictionary.
+     *
+     * @param array<int> $keys Image IDs.
+     */
+    public function getXobjectDictByKeys(array $keys): string
+    {
+        if (empty($keys)) {
+            return '';
+        }
+
+        $out = '';
+
+        foreach ($keys as $iid) {
+            $key = 'IMG' . $iid;
+            if (!empty($this->xobjdict[$key])) {
+                $out .= ' /' . $key . ' ' . $this->xobjdict[$key] . ' 0 R';
+                continue;
+            }
+            $key = 'IMGplain' . $iid;
+            if (!empty($this->xobjdict[$key])) {
+                $out .= ' /' . $key . ' ' . $this->xobjdict[$key] . ' 0 R';
+                continue;
+            }
+            $key = 'IMGmask' . $iid;
+            if (!empty($this->xobjdict[$key])) {
+                $out .= ' /' . $key . ' ' . $this->xobjdict[$key] . ' 0 R';
+                continue;
+            }
         }
 
         return $out;
