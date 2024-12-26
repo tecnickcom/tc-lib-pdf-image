@@ -91,8 +91,8 @@ use Com\Tecnick\Pdf\Image\Import\ImageImportInterface;
  *          'width': int,
  *      }
  *
- * @SuppressWarnings(PHPMD.ExcessiveClassLength)
- * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
+ * @SuppressWarnings("PHPMD.ExcessiveClassLength")
+ * @SuppressWarnings("PHPMD.ExcessiveClassComplexity")
  */
 class Import extends \Com\Tecnick\Pdf\Image\Output
 {
@@ -430,7 +430,7 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
             $data['channels'] = (int) $meta['channels'];
         }
 
-        if (isset(self::COLSPACEMAP[$data['channels']]) && self::COLSPACEMAP[$data['channels']] !== '') {
+        if (isset(self::COLSPACEMAP[$data['channels']])) {
             $data['colspace'] = self::COLSPACEMAP[$data['channels']];
         }
 
@@ -451,8 +451,8 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
      *
      * @return ImageRawData Image raw data array.
      *
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
-     * @SuppressWarnings(PHPMD.NPathComplexity)
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
+     * @SuppressWarnings("PHPMD.NPathComplexity")
      */
     protected function getResizedRawData(
         array $data,
@@ -534,7 +534,10 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
             throw new ImageException('Unable to create alpha channel image from string');
         }
 
-        $newimg = imagecreate($data['width'], $data['height']);
+        $newimg = imagecreate(
+            max(1, $data['width']),
+            max(1, $data['height']),
+        );
         if ($newimg === false) {
             throw new ImageException('Unable to create new empty alpha channel image');
         }

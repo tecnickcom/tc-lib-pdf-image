@@ -33,7 +33,7 @@ use Com\Tecnick\Pdf\Image\Exception as ImageException;
  * @phpstan-import-type ImageBaseData from \Com\Tecnick\Pdf\Image\Import
  * @phpstan-import-type ImageRawData from \Com\Tecnick\Pdf\Image\Import
  *
- * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
+ * @SuppressWarnings("PHPMD.ExcessiveClassComplexity")
  */
 abstract class Output
 {
@@ -221,7 +221,7 @@ abstract class Output
             $out .= ' /Length 0 /F'
             . ' <<'
             . ' /FS /URL /F '
-            . $this->encrypt->escapeDataString($data['exturl'], $this->pon)
+            . $this->encrypt->escapeDataString(empty($data['exturl']) ? 'false' : 'true', $this->pon)
             . ' >>';
             if (! empty($data['filter'])) {
                 $out .= ' /FFilter /' . $data['filter'];
@@ -309,12 +309,7 @@ abstract class Output
     /**
      * Get the PDF output string for ICC object.
      *
-     * @param array{
-     *          'channels': int,
-     *          'colspace': string,
-     *          'icc': string,
-     *          'obj_icc': int,
-     *        } $data Image raw data.
+     * @param ImageBaseData $data Image raw data.
      */
     protected function getOutIcc(array &$data): string
     {
@@ -348,11 +343,7 @@ abstract class Output
     /**
      * Get the PDF output string for Indexed palette object.
      *
-     * @param array{
-     *        'colspace': string,
-     *        'obj_pal': int,
-     *        'pal': string,
-     * } $data Image raw data.
+     * @param ImageBaseData $data Image raw data.
      */
     protected function getOutPalette(array &$data): string
     {
@@ -384,16 +375,7 @@ abstract class Output
     /**
      * Get the PDF output string for color and mask information.
      *
-     * @param array{
-     *        'bits': int,
-     *        'colspace': string,
-     *        'ismask': bool,
-     *        'key': string,
-     *        'obj_alt': int,
-     *        'obj_icc': int,
-     *        'obj_pal': int,
-     *        'pal': string,
-     * } $data Image raw data.
+     * @param ImageBaseData $data Image raw data.
      */
     protected function getOutColorInfo(array $data): string
     {
@@ -441,9 +423,7 @@ abstract class Output
      *          'defprint': bool,
      *          'altimgs'?: array<int, int>,
      *      } $img Image reference.
-     * @param array{
-     *            'obj_alt': int,
-     *        } $data Image raw data.
+     * @param ImageBaseData $data Image raw data.
      * @param string $sub Sub image ('mask', 'plain' or empty string).
      */
     protected function getOutAltImages(

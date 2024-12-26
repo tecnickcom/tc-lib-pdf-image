@@ -16,6 +16,8 @@
 
 namespace Test;
 
+use PHPUnit\Framework\Attributes\DataProvider;
+
 /**
  * Unit Test
  *
@@ -71,9 +73,7 @@ class ImportTest extends TestUtil
         ];
     }
 
-    /**
-     * @dataProvider getBadAddValues
-     */
+    #[DataProvider('getBadAddValues')]
     public function testAddError(string $bad): void
     {
         $this->bcExpectException('\\' . \Com\Tecnick\Pdf\Image\Exception::class);
