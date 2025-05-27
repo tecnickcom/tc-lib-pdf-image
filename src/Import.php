@@ -119,17 +119,17 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
      * @var array<int>
      */
     protected const LOSSLESS = [
-        IMAGETYPE_GIF,
-        IMAGETYPE_PNG,
-        IMAGETYPE_PSD,
-        IMAGETYPE_BMP,
-        IMAGETYPE_WBMP,
-        IMAGETYPE_XBM,
-        IMAGETYPE_TIFF_II,
-        IMAGETYPE_TIFF_MM,
-        IMAGETYPE_IFF,
-        IMAGETYPE_SWC,
-        IMAGETYPE_ICO,
+        IMAGETYPE_GIF,     // 1
+        IMAGETYPE_PNG,     // 3
+        IMAGETYPE_PSD,     // 5
+        IMAGETYPE_BMP,     // 6
+        IMAGETYPE_WBMP,    // 15
+        IMAGETYPE_XBM,     // 16
+        IMAGETYPE_TIFF_II, // 7
+        IMAGETYPE_TIFF_MM, // 8
+        IMAGETYPE_IFF,     // 14
+        IMAGETYPE_SWC,     // 13
+        IMAGETYPE_ICO,     // 17
     ];
 
     /**
