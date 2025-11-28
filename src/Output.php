@@ -160,7 +160,13 @@ abstract class Output
                 } else {
                     $out .= $this->getOutImage($img, $this->cache[$img['key']]['mask'], 'mask');
                     if (!empty($this->cache[$img['key']]['plain'])) {
-                        $out .= $this->getOutImage($img, $this->cache[$img['key']]['plain'], 'plain');
+                        /** @var ImageBaseData $plain */
+                        $plain = &$this->cache[$img['key']]['plain'];
+                        $out .= $this->getOutImage(
+                            $img,
+                            $plain,
+                            'plain',
+                        );
                     }
                 }
 
