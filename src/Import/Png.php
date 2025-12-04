@@ -48,7 +48,7 @@ class Png implements ImageImportInterface
 
         $offset = 0;
         // check signature
-        if (substr($data['raw'], $offset, 8) !== chr(137) . 'PNG' . chr(13) . chr(10) . chr(26) . chr(10)) {
+        if (\substr($data['raw'], $offset, 8) !== \chr(137) . 'PNG' . \chr(13) . \chr(10) . \chr(26) . \chr(10)) {
             // @codeCoverageIgnoreStart
             throw new ImageException('Not a PNG image');
             // @codeCoverageIgnoreEnd
@@ -79,10 +79,10 @@ class Png implements ImageImportInterface
             return $data;
         }
 
-        if (str_contains($data['colspace'], '+Alpha')) {
+        if (\str_contains($data['colspace'], '+Alpha')) {
             // alpha channel: split images (plain + alpha)
             $data['splitalpha'] = true;
-            $data['colspace'] = substr($data['colspace'], 0, -6);
+            $data['colspace'] = \substr($data['colspace'], 0, -6);
             return $data;
         }
 
@@ -109,7 +109,7 @@ class Png implements ImageImportInterface
     protected function getIhdrChunk(array $data, int &$offset): array
     {
         $byte = new Byte($data['raw']);
-        if (substr($data['raw'], $offset, 4) != 'IHDR') {
+        if (\substr($data['raw'], $offset, 4) != 'IHDR') {
             // @codeCoverageIgnoreStart
             throw new ImageException('Invalid PNG image');
             // @codeCoverageIgnoreEnd
@@ -156,7 +156,7 @@ class Png implements ImageImportInterface
         $byte = new Byte($data['raw']);
         while (($len = $byte->getULong($offset)) >= 0) {
             $offset += 4;
-            $type = substr($data['raw'], $offset, 4);
+            $type = \substr($data['raw'], $offset, 4);
             $offset += 4;
             if ($type == 'PLTE') {
                 $data = $this->getPlteChunk($data, $offset, $len);
@@ -199,7 +199,7 @@ class Png implements ImageImportInterface
      */
     protected function getPlteChunk(array $data, int &$offset, int $len): array
     {
-        $data['pal'] = substr($data['raw'], $offset, $len);
+        $data['pal'] = \substr($data['raw'], $offset, $len);
         $offset += $len;
         $offset += 4;
         return $data;
@@ -217,19 +217,19 @@ class Png implements ImageImportInterface
     protected function getTrnsChunk(array $data, int &$offset, int $len): array
     {
         // read transparency info
-        $trns = substr($data['raw'], $offset, $len);
+        $trns = \substr($data['raw'], $offset, $len);
         $offset += $len;
         if ($data['colspace'] == 'DeviceGray') {
             // DeviceGray
-            $data['trns'][] = ord($trns[1]);
+            $data['trns'][] = \ord($trns[1]);
         } elseif ($data['colspace'] == 'DeviceRGB') {
             // DeviceRGB
-            $data['trns'][] = ord($trns[1]);
-            $data['trns'][] = ord($trns[3]);
-            $data['trns'][] = ord($trns[5]);
+            $data['trns'][] = \ord($trns[1]);
+            $data['trns'][] = \ord($trns[3]);
+            $data['trns'][] = \ord($trns[5]);
         } else {
             // Indexed
-            $data['trns'] = array_map('ord', str_split($trns));
+            $data['trns'] = \array_map('ord', \str_split($trns));
         }
 
         $offset += 4;
@@ -250,7 +250,7 @@ class Png implements ImageImportInterface
      */
     protected function getIdatChunk(array $data, int &$offset, int $len): array
     {
-        $data['data'] .= substr($data['raw'], $offset, $len);
+        $data['data'] .= \substr($data['raw'], $offset, $len);
         $offset += $len;
         $offset += 4;
         return $data;
@@ -287,7 +287,7 @@ class Png implements ImageImportInterface
 
         // read ICC Color Profile
         $len -= ($pos + 2);
-        $icc = gzuncompress(substr($data['raw'], $offset, $len));
+        $icc = \gzuncompress(\substr($data['raw'], $offset, $len));
         if ($icc !== false) {
             $data['icc'] = $icc;
         } else {

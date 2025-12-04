@@ -195,10 +195,10 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
         int $height = 0,
         int $quality = 100,
     ): string {
-        return strtr(
-            rtrim(
-                base64_encode(
-                    pack('H*', md5($image . $width . $height . $quality))
+        return \strtr(
+            \rtrim(
+                \base64_encode(
+                    \pack('H*', \md5($image . $width . $height . $quality))
                 ),
                 '='
             ),
@@ -243,7 +243,7 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
         bool $ismask = false,
         int $quality = 100,
     ): array {
-        $quality = max(0, min(100, $quality));
+        $quality = \max(0, \min(100, $quality));
         $imgkey = $this->getKey($image, (int) $width, (int) $height, $quality);
 
         if (isset($this->cache[$imgkey])) {
@@ -257,13 +257,13 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
             $width = $data['width'];
         }
 
-        $width = max(0, (int) $width);
+        $width = \max(0, (int) $width);
 
         if ($height === null) {
             $height = $data['height'];
         }
 
-        $height = max(0, (int) $height);
+        $height = \max(0, (int) $height);
 
         if ((! $data['native']) || ($width != $data['width']) || ($height != $data['height'])) {
             $data = $this->getResizedRawData($data, $width, $height, true, $quality);
@@ -372,18 +372,18 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
             'width' => 0,              // image width in pixels
         ];
 
-        if ($image === '' || ((($image[0] === '@') || ($image[0] === '*')) && (strlen($image) === 1))) {
+        if ($image === '' || ((($image[0] === '@') || ($image[0] === '*')) && (\strlen($image) === 1))) {
             throw new ImageException('Empty image');
         }
 
         if ($image[0] === '@') { // image from string
-            $data['raw'] = substr($image, 1);
+            $data['raw'] = \substr($image, 1);
             return $this->getMetaData($data);
         }
 
         if ($image[0] === '*') { // not-embedded external URL
             $data['exturl'] = true;
-            $image = substr($image, 1);
+            $image = \substr($image, 1);
         }
 
         $data['file'] = $image;
@@ -408,7 +408,7 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
     protected function getMetaData(array $data): array
     {
         try {
-            $meta = @getimagesizefromstring($data['raw']);
+            $meta = @\getimagesizefromstring($data['raw']);
         } catch (\Exception $exception) {
             throw new ImageException('Invalid image format: ' . $exception);
         }
@@ -421,7 +421,7 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
         $data['height'] = $meta[1];
         $data['type'] = $meta[2];
         $data['native'] = isset(self::NATIVE[$data['type']]);
-        $data['mapto'] = (in_array($data['type'], self::LOSSLESS) ? IMAGETYPE_PNG : IMAGETYPE_JPEG);
+        $data['mapto'] = (\in_array($data['type'], self::LOSSLESS) ? IMAGETYPE_PNG : IMAGETYPE_JPEG);
         if (isset($meta['bits'])) {
             $data['bits'] = $meta['bits'];
         }
@@ -465,51 +465,51 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
             throw new ImageException('Image width and/or height are empty');
         }
 
-        $img = imagecreatefromstring($data['raw']);
+        $img = \imagecreatefromstring($data['raw']);
         if ($img === false) {
             throw new ImageException('Unable to create new image from string');
         }
 
-        $newimg = imagecreatetruecolor($width, $height);
+        $newimg = \imagecreatetruecolor($width, $height);
         if ($newimg === false) {
             throw new ImageException('Unable to create new resized image');
         }
 
-        imageinterlace($newimg, false);
+        \imageinterlace($newimg, false);
 
         if ($alpha) {
-            $trid = imagecolorallocate($newimg, 0, 0, 0);
+            $trid = \imagecolorallocate($newimg, 0, 0, 0);
             if ($trid === false) {
                 throw new ImageException('Unable to allocate alpha color for transparency');
             }
-            imagecolortransparent($newimg, $trid);
+            \imagecolortransparent($newimg, $trid);
         } else {
-            $tid = imagecolortransparent($img);
-            $palsize = imagecolorstotal($img);
+            $tid = \imagecolortransparent($img);
+            $palsize = \imagecolorstotal($img);
             if (($tid >= 0) && ($palsize > 0) && ($tid < $palsize)) {
                 // set transparency for Indexed image
-                $tcol = imagecolorsforindex($img, $tid);
-                $trid = imagecolorallocate($newimg, $tcol['red'], $tcol['green'], $tcol['blue']);
+                $tcol = \imagecolorsforindex($img, $tid);
+                $trid = \imagecolorallocate($newimg, $tcol['red'], $tcol['green'], $tcol['blue']);
                 if ($trid === false) {
                     throw new ImageException('Unable to allocate color for transparency');
                 }
-                imagefill($newimg, 0, 0, $trid);
-                imagecolortransparent($newimg, $trid);
+                \imagefill($newimg, 0, 0, $trid);
+                \imagecolortransparent($newimg, $trid);
             }
         }
 
-        imagealphablending($newimg, ! $alpha);
-        imagesavealpha($newimg, $alpha);
+        \imagealphablending($newimg, ! $alpha);
+        \imagesavealpha($newimg, $alpha);
 
-        imagecopyresampled($newimg, $img, 0, 0, 0, 0, $width, $height, $data['width'], $data['height']);
+        \imagecopyresampled($newimg, $img, 0, 0, 0, 0, $width, $height, $data['width'], $data['height']);
 
-        ob_start();
+        \ob_start();
         if ($data['mapto'] == IMAGETYPE_PNG) {
-            imagepng($newimg, null, 9, PNG_ALL_FILTERS);
+            \imagepng($newimg, null, 9, PNG_ALL_FILTERS);
         } else {
-            imagejpeg($newimg, null, $quality);
+            \imagejpeg($newimg, null, $quality);
         }
-        $ogc = ob_get_clean();
+        $ogc = \ob_get_clean();
         if ($ogc === false) {
             throw new ImageException('Unable to extract alpha channel');
         }
@@ -529,45 +529,45 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
      */
     protected function getAlphaChannelRawData(array $data): array
     {
-        $img = imagecreatefromstring($data['raw']);
+        $img = \imagecreatefromstring($data['raw']);
         if ($img === false) {
             throw new ImageException('Unable to create alpha channel image from string');
         }
 
-        $newimg = imagecreate(
-            max(1, $data['width']),
-            max(1, $data['height']),
+        $newimg = \imagecreate(
+            \max(1, $data['width']),
+            \max(1, $data['height']),
         );
         if ($newimg === false) {
             throw new ImageException('Unable to create new empty alpha channel image');
         }
 
-        imageinterlace($newimg, false);
+        \imageinterlace($newimg, false);
 
         // generate gray scale palette (0 -> 255)
         for ($col = 0; $col < 256; ++$col) {
-            imagecolorallocate($newimg, $col, $col, $col);
+            \imagecolorallocate($newimg, $col, $col, $col);
         }
 
         // extract alpha channel
         for ($xpx = 0; $xpx < $data['width']; ++$xpx) {
             for ($ypx = 0; $ypx < $data['height']; ++$ypx) {
-                $colindex = imagecolorat($img, $xpx, $ypx);
+                $colindex = \imagecolorat($img, $xpx, $ypx);
                 if ($colindex === false) {
                     throw new ImageException('Unable to extract alpha channel color index');
                 }
 
                 // get and correct gamma color
-                $color = imagecolorsforindex($img, $colindex);
+                $color = \imagecolorsforindex($img, $colindex);
                 // GD alpha is only 7 bit (0 -> 127); 2.2 is the gamma value
                 $alpha = (int) (((float) (127 - $color['alpha']) / 127) ** 2.2 * 255);
-                imagesetpixel($newimg, $xpx, $ypx, $alpha);
+                \imagesetpixel($newimg, $xpx, $ypx, $alpha);
             }
         }
 
-        ob_start();
-        imagepng($newimg, null, 9, PNG_ALL_FILTERS);
-        $ogc = ob_get_clean();
+        \ob_start();
+        \imagepng($newimg, null, 9, PNG_ALL_FILTERS);
+        $ogc = \ob_get_clean();
         if ($ogc === false) {
             throw new ImageException('Unable to extract alpha channel');
         }
