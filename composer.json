@@ -24,7 +24,7 @@
     "ext-gd": "*",
     "ext-zlib": "*",
     "tecnickcom/tc-lib-file": "^2.2",
-    "tecnickcom/tc-lib-color": "^2.2",
+    "tecnickcom/tc-lib-color": "^2.3",
     "tecnickcom/tc-lib-pdf-encrypt": "^2.1"
   },
   "require-dev": {
