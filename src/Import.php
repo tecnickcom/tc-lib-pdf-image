@@ -147,7 +147,7 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
      * Add a new image.
      *
      * @param string          $image    Image file name, URL or a '@' character followed by the image data string.
-     *                                  To link an image without embeding it on the document, set an asterisk
+     *                                  To link an image without embedding it on the document, set an asterisk
      *                                  character before the URL (i.e.: '*http://www.example.com/image.jpg').
      * @param ?int            $width    New width in pixels or null to keep the original value.
      * @param ?int            $height   New height in pixels or null to keep the original value.
@@ -227,7 +227,7 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
      * Import the original image raw data.
      *
      * @param string $image   Image file name, URL or a '@' character followed by the image data string.
-     *                        To link an image without embeding it on the document, set an asterisk
+     *                        To link an image without embedding it on the document, set an asterisk
      *                        character before the URL (i.e.: '*http://www.example.com/image.jpg').
      * @param ?int   $width   New width in pixels or null to keep the original value.
      * @param ?int   $height  New height in pixels or null to keep the original value.
@@ -335,7 +335,7 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
      * Get the original image raw data.
      *
      * @param string $image Image file name, URL or a '@' character followed by the image data string.
-     *                      To link an image without embeding it on the document, set an asterisk character
+     *                      To link an image without embedding it on the document, set an asterisk character
      *                      before the URL (i.e.: '*http://www.example.com/image.jpg').
      *
      * @return ImageRawData Image data array.
