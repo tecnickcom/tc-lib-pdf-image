@@ -348,7 +348,7 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
             'channels' => 3,           // number of channels
             'colspace' => 'DeviceRGB', // color space
             'data' => '',              // PDF image data
-            'exturl' => false,         // true if the image is an exernal URL that should not be embeded
+            'exturl' => false,         // true if the image is an exernal URL that should not be embedded
             'file' => '',              // source file name or URL
             'filter' => 'FlateDecode', // decoding filter
             'height' => 0,             // image height in pixels
@@ -381,7 +381,7 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
             return $this->getMetaData($data);
         }
 
-        if ($image[0] === '*') { // not-embeded external URL
+        if ($image[0] === '*') { // not-embedded external URL
             $data['exturl'] = true;
             $image = \substr($image, 1);
         }
