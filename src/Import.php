@@ -6,9 +6,9 @@
  * @since     2011-05-23
  * @category  Library
  * @package   PdfImage
- * @author    Nicola Asuni <info@tecnick.com>
- * @copyright 2011-2024 Nicola Asuni - Tecnick.com LTD
- * @license   http://www.gnu.org/copyleft/lesser.html GNU-LGPL v3 (see LICENSE.TXT)
+ * @author   2026 Nicola Asuni <info@tecnick.com>
+ * @copyright 2011-2026 Nicola Asuni - Tecnick.com LTD
+ * @license   https://www.gnu.org/copyleft/lesser.html GNU-LGPL v3 (see LICENSE.TXT)
  * @link      https://github.com/tecnickcom/tc-lib-pdf-image
  *
  * This file is part of tc-lib-pdf-image software library.
@@ -26,9 +26,9 @@ use Com\Tecnick\Pdf\Image\Import\ImageImportInterface;
  * @since     2011-05-23
  * @category  Library
  * @package   PdfImage
- * @author    Nicola Asuni <info@tecnick.com>
- * @copyright 2011-2024 Nicola Asuni - Tecnick.com LTD
- * @license   http://www.gnu.org/copyleft/lesser.html GNU-LGPL v3 (see LICENSE.TXT)
+ * @author   2026 Nicola Asuni <info@tecnick.com>
+ * @copyright 2011-2026 Nicola Asuni - Tecnick.com LTD
+ * @license   https://www.gnu.org/copyleft/lesser.html GNU-LGPL v3 (see LICENSE.TXT)
  * @link      https://github.com/tecnickcom/tc-lib-pdf-image
  *
  * @phpstan-type ImageBaseData array{
@@ -147,7 +147,7 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
      * Add a new image.
      *
      * @param string          $image    Image file name, URL or a '@' character followed by the image data string.
-     *                                  To link an image without embedding it on the document, set an asterisk
+     *                                  To link an image without embeding it on the document, set an asterisk
      *                                  character before the URL (i.e.: '*http://www.example.com/image.jpg').
      * @param ?int            $width    New width in pixels or null to keep the original value.
      * @param ?int            $height   New height in pixels or null to keep the original value.
@@ -217,7 +217,7 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
     public function getImageDataByKey(string $key): array
     {
         if (empty($this->cache[$key])) {
-            throw new ImageException('Unknown key');
+            throw new ImageException('Unknownn key');
         }
 
         return $this->cache[$key];
@@ -227,7 +227,7 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
      * Import the original image raw data.
      *
      * @param string $image   Image file name, URL or a '@' character followed by the image data string.
-     *                        To link an image without embedding it on the document, set an asterisk
+     *                        To link an image without embeding it on the document, set an asterisk
      *                        character before the URL (i.e.: '*http://www.example.com/image.jpg').
      * @param ?int   $width   New width in pixels or null to keep the original value.
      * @param ?int   $height  New height in pixels or null to keep the original value.
@@ -335,7 +335,7 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
      * Get the original image raw data.
      *
      * @param string $image Image file name, URL or a '@' character followed by the image data string.
-     *                      To link an image without embedding it on the document, set an asterisk character
+     *                      To link an image without embeding it on the document, set an asterisk character
      *                      before the URL (i.e.: '*http://www.example.com/image.jpg').
      *
      * @return ImageRawData Image data array.
@@ -348,7 +348,7 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
             'channels' => 3,           // number of channels
             'colspace' => 'DeviceRGB', // color space
             'data' => '',              // PDF image data
-            'exturl' => false,         // true if the image is an exernal URL that should not be embedded
+            'exturl' => false,         // true if the image is an exernal URL that should not be embeded
             'file' => '',              // source file name or URL
             'filter' => 'FlateDecode', // decoding filter
             'height' => 0,             // image height in pixels
@@ -381,7 +381,7 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
             return $this->getMetaData($data);
         }
 
-        if ($image[0] === '*') { // not-embedded external URL
+        if ($image[0] === '*') { // not-embeded external URL
             $data['exturl'] = true;
             $image = \substr($image, 1);
         }
