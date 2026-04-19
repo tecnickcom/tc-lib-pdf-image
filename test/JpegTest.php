@@ -276,4 +276,86 @@ class JpegTest extends TestUtil
         $this->assertEquals($file, $result['raw']);
         $this->assertEquals($file, $result['data']);
     }
+
+    public function testGetDataWithMissingIcc(): void
+    {
+        $import = new \Com\Tecnick\Pdf\Image\Import\Jpeg();
+        $file = \file_get_contents(__DIR__ . '/images/200x100_RGB.jpg');
+        $this->assertIsString($file);
+
+        $data = [
+            'bits' => 8,
+            'channels' => 3,
+            'colspace' => 'DeviceRGB',
+            'data' => '',
+            'exturl' => false,
+            'file' => __DIR__ . '/images/200x100_RGB.jpg',
+            'filter' => '',
+            'height' => 100,
+            'icc' => '',
+            'ismask' => false,
+            'key' => 'test',
+            'mapto' => IMAGETYPE_JPEG,
+            'native' => true,
+            'obj' => 0,
+            'obj_alt' => 0,
+            'obj_icc' => 0,
+            'obj_pal' => 0,
+            'pal' => '',
+            'parms' => '',
+            'raw' => $file,
+            'recode' => false,
+            'recoded' => false,
+            'splitalpha' => false,
+            'trns' => [],
+            'type' => IMAGETYPE_JPEG,
+            'width' => 200,
+        ];
+
+        $result = $import->getData($data);
+
+        $this->assertEquals('DCTDecode', $result['filter']);
+        $this->assertEquals('DeviceRGB', $result['colspace']);
+    }
+
+    public function testGetDataPreservesChannels(): void
+    {
+        $import = new \Com\Tecnick\Pdf\Image\Import\Jpeg();
+        $file = \file_get_contents(__DIR__ . '/images/200x100_GRAY.jpg');
+        $this->assertIsString($file);
+
+        $data = [
+            'bits' => 8,
+            'channels' => 1,
+            'colspace' => 'DeviceGray',
+            'data' => '',
+            'exturl' => false,
+            'file' => __DIR__ . '/images/200x100_GRAY.jpg',
+            'filter' => '',
+            'height' => 100,
+            'icc' => '',
+            'ismask' => false,
+            'key' => 'test',
+            'mapto' => IMAGETYPE_JPEG,
+            'native' => true,
+            'obj' => 0,
+            'obj_alt' => 0,
+            'obj_icc' => 0,
+            'obj_pal' => 0,
+            'pal' => '',
+            'parms' => '',
+            'raw' => $file,
+            'recode' => false,
+            'recoded' => false,
+            'splitalpha' => false,
+            'trns' => [],
+            'type' => IMAGETYPE_JPEG,
+            'width' => 200,
+        ];
+
+        $result = $import->getData($data);
+
+        $this->assertEquals(1, $result['channels']);
+        $this->assertEquals($file, $result['data']);
+    }
 }

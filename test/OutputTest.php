@@ -147,4 +147,35 @@ class OutputTest extends TestUtil
         $import = $this->getTestObject();
         $import->getSetImage(999, 0, 0, 100, 100, 600);
     }
+
+    public function testGetSetImageMultipleImages(): void
+    {
+        $import = $this->getTestObject();
+        $iid1 = $import->add(__DIR__ . '/images/200x100_RGB.png');
+        $iid2 = $import->add(__DIR__ . '/images/200x100_GRAY.jpg');
+
+        $result1 = $import->getSetImage($iid1, 0, 0, 100, 100, 600);
+        $result2 = $import->getSetImage($iid2, 10, 10, 150, 150, 600);
+
+        $this->assertNotEmpty($result1);
+        $this->assertNotEmpty($result2);
+        $this->assertStringContainsString('IMG' . $iid1, $result1);
+        $this->assertStringContainsString('IMG' . $iid2, $result2);
+    }
+
+    public function testGetSetImageVariousCoordinates(): void
+    {
+        $import = $this->getTestObject();
+        $iid = $import->add(__DIR__ . '/images/200x100_RGB.png');
+
+        // Test with zero coordinates
+        $result = $import->getSetImage($iid, 0, 0, 100, 100, 600);
+        $this->assertStringContainsString('0.000000', $result);
+        $this->assertStringContainsString('cm /IMG', $result);
+
+        // Test with large coordinates
+        $result2 = $import->getSetImage($iid, 100, 200, 300, 400, 1000);
+        $this->assertStringContainsString('300.000000', $result2);
+        $this->assertStringContainsString('cm /IMG', $result2);
+    }
 }
