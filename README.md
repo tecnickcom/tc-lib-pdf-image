@@ -18,6 +18,8 @@ If this library helps your image workflow, please consider [supporting developme
 
 `tc-lib-pdf-image` handles image import, conversion, and output structures used by PDF generators.
 
+The library isolates image pipeline concerns such as format handling, normalization, and object generation for PDF embedding. Keeping this logic separate helps reduce complexity in document-level code and makes image behavior easier to validate and maintain.
+
 | | |
 |---|---|
 | **Namespace** | `\Com\Tecnick\Pdf\Image` |
