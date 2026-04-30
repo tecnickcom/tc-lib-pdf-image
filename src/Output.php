@@ -16,6 +16,7 @@
 
 namespace Com\Tecnick\Pdf\Image;
 
+use Com\Tecnick\File\File as ObjFile;
 use Com\Tecnick\Pdf\Encrypt\Encrypt;
 use Com\Tecnick\Pdf\Image\Exception as ImageException;
 
@@ -29,6 +30,14 @@ use Com\Tecnick\Pdf\Image\Exception as ImageException;
  * @copyright 2011-2026 Nicola Asuni - Tecnick.com LTD
  * @license   https://www.gnu.org/copyleft/lesser.html GNU-LGPL v3 (see LICENSE.TXT)
  * @link      https://github.com/tecnickcom/tc-lib-pdf-image
+ *
+ * @phpstan-type TFileOptions array{
+ *   allowedHosts?: array<string>,
+ *   maxRemoteSize?: int,
+ *   curlopts?: array<int, bool|int|string>,
+ *   defaultCurlOpts?: array<int, bool|int|string>,
+ *   fixedCurlOpts?: array<int, bool|int|string>
+ * }
  *
  * @phpstan-import-type ImageBaseData from \Com\Tecnick\Pdf\Image\Import
  * @phpstan-import-type ImageRawData from \Com\Tecnick\Pdf\Image\Import
@@ -72,12 +81,18 @@ abstract class Output
     protected array $cache = [];
 
     /**
+     * File helper used to load image sources.
+     */
+    protected ObjFile $file;
+
+    /**
      * Initialize images data.
      *
      * @param float   $kunit    Unit of measure conversion ratio.
      * @param Encrypt $encrypt Encrypt object.
      * @param bool    $pdfa     True if we are in PDF/A mode.
      * @param bool    $compress Set to false to disable stream compression.
+     * @param TFileOptions|null $fileOptions Optional configuration for the image file helper.
      */
     public function __construct(
         protected float $kunit,
@@ -86,8 +101,16 @@ abstract class Output
          */
         protected Encrypt $encrypt,
         protected bool $pdfa = false,
-        protected bool $compress = true
+        protected bool $compress = true,
+        ?array $fileOptions = null
     ) {
+        $this->file = new ObjFile(
+            $fileOptions['allowedHosts'] ?? [],
+            $fileOptions['maxRemoteSize'] ?? 52428800,
+            $fileOptions['curlopts'] ?? [],
+            $fileOptions['defaultCurlOpts'] ?? null,
+            $fileOptions['fixedCurlOpts'] ?? null
+        );
     }
 
     /**

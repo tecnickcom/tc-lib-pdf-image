@@ -44,6 +44,53 @@ class ImportTest extends TestUtil
         $this->assertEquals('6EvJjr-KnDm4EnAWVt-7wQ', $result);
     }
 
+    public function testConstructorPassesFileOptionsToImageFileHelper(): void
+    {
+        $encrypt = new \Com\Tecnick\Pdf\Encrypt\Encrypt();
+        $allowedHosts = ['localhost', 'example.test'];
+        $maxRemoteSize = 10485760;
+        $curlopts = [CURLOPT_TIMEOUT => 5];
+        $defaultCurlOpts = [CURLOPT_TIMEOUT => 12];
+        $fixedCurlOpts = [CURLOPT_SSL_VERIFYHOST => 2, CURLOPT_SSL_VERIFYPEER => true];
+
+        $import = new \Com\Tecnick\Pdf\Image\Import(
+            0.75,
+            $encrypt,
+            false,
+            true,
+            [
+                'allowedHosts' => $allowedHosts,
+                'maxRemoteSize' => $maxRemoteSize,
+                'curlopts' => $curlopts,
+                'defaultCurlOpts' => $defaultCurlOpts,
+                'fixedCurlOpts' => $fixedCurlOpts,
+            ]
+        );
+
+        $method = new \ReflectionProperty($import, 'file');
+        $method->setAccessible(true);
+        /** @var \Com\Tecnick\File\File $file */
+        $file = $method->getValue($import);
+
+        $ref = new \ReflectionClass($file);
+        $allowedHostsProp = $ref->getProperty('allowedHosts');
+        $allowedHostsProp->setAccessible(true);
+        $maxRemoteSizeProp = $ref->getProperty('maxRemoteSize');
+        $maxRemoteSizeProp->setAccessible(true);
+        $curloptsProp = $ref->getProperty('curlopts');
+        $curloptsProp->setAccessible(true);
+        $defaultProp = $ref->getProperty('defaultCurlOpts');
+        $defaultProp->setAccessible(true);
+        $fixedProp = $ref->getProperty('fixedCurlOpts');
+        $fixedProp->setAccessible(true);
+
+        $this->assertSame($allowedHosts, $allowedHostsProp->getValue($file));
+        $this->assertSame($maxRemoteSize, $maxRemoteSizeProp->getValue($file));
+        $this->assertSame($curlopts, $curloptsProp->getValue($file));
+        $this->assertSame($defaultCurlOpts, $defaultProp->getValue($file));
+        $this->assertSame($fixedCurlOpts, $fixedProp->getValue($file));
+    }
+
     public function testGetImageDataByKeyError(): void
     {
         $this->bcExpectException('\\' . \Com\Tecnick\Pdf\Image\Exception::class);

@@ -16,7 +16,6 @@
 
 namespace Com\Tecnick\Pdf\Image;
 
-use Com\Tecnick\File\File;
 use Com\Tecnick\Pdf\Image\Exception as ImageException;
 use Com\Tecnick\Pdf\Image\Import\ImageImportInterface;
 
@@ -387,8 +386,7 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
         }
 
         $data['file'] = $image;
-        $file = new File();
-        $raw = $file->getFileData($image);
+        $raw = $this->file->getFileData($image);
         if ($raw === false) {
             throw new ImageException('Unable to read image file: ' . $image);
         }
