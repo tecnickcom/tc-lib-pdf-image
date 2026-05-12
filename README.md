@@ -46,7 +46,7 @@ The library isolates image pipeline concerns such as format handling, normalizat
 
 ## Requirements
 
-- PHP 8.1 or later
+- PHP 8.2 or later
 - Extensions: `gd`, `zlib`
 - Composer
 

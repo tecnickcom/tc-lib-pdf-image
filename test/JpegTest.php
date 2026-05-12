@@ -29,6 +29,9 @@ namespace Test;
  */
 class JpegTest extends TestUtil
 {
+    /**
+     * @throws \RangeException
+     */
     public function testGetDataRgbJpeg(): void
     {
         $import = new \Com\Tecnick\Pdf\Image\Import\Jpeg();
@@ -71,6 +74,9 @@ class JpegTest extends TestUtil
         $this->assertEquals($file, $result['data']);
     }
 
+    /**
+     * @throws \RangeException
+     */
     public function testGetDataGrayJpeg(): void
     {
         $import = new \Com\Tecnick\Pdf\Image\Import\Jpeg();
@@ -112,6 +118,9 @@ class JpegTest extends TestUtil
         $this->assertEquals(1, $result['channels']);
     }
 
+    /**
+     * @throws \RangeException
+     */
     public function testGetDataCmykJpeg(): void
     {
         $import = new \Com\Tecnick\Pdf\Image\Import\Jpeg();
@@ -154,6 +163,9 @@ class JpegTest extends TestUtil
         $this->assertEquals('DeviceCMYK', $result['colspace']);
     }
 
+    /**
+     * @throws \RangeException
+     */
     public function testGetDataJpegWithIcc(): void
     {
         $import = new \Com\Tecnick\Pdf\Image\Import\Jpeg();
@@ -195,6 +207,9 @@ class JpegTest extends TestUtil
         $this->assertNotEmpty($result['icc']);
     }
 
+    /**
+     * @throws \RangeException
+     */
     public function testGetDataJpegWithoutIcc(): void
     {
         $import = new \Com\Tecnick\Pdf\Image\Import\Jpeg();
@@ -236,6 +251,9 @@ class JpegTest extends TestUtil
         $this->assertEmpty($result['icc']);
     }
 
+    /**
+     * @throws \RangeException
+     */
     public function testGetDataPreservesRawData(): void
     {
         $import = new \Com\Tecnick\Pdf\Image\Import\Jpeg();
@@ -277,6 +295,9 @@ class JpegTest extends TestUtil
         $this->assertEquals($file, $result['data']);
     }
 
+    /**
+     * @throws \RangeException
+     */
     public function testGetDataWithMissingIcc(): void
     {
         $import = new \Com\Tecnick\Pdf\Image\Import\Jpeg();
@@ -318,6 +339,9 @@ class JpegTest extends TestUtil
         $this->assertEquals('DeviceRGB', $result['colspace']);
     }
 
+    /**
+     * @throws \RangeException
+     */
     public function testGetDataPreservesChannels(): void
     {
         $import = new \Com\Tecnick\Pdf\Image\Import\Jpeg();

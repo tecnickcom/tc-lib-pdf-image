@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Output.php
  *
@@ -102,14 +104,14 @@ abstract class Output
         protected Encrypt $encrypt,
         protected bool $pdfa = false,
         protected bool $compress = true,
-        ?array $fileOptions = null
+        ?array $fileOptions = null,
     ) {
         $this->file = new ObjFile(
             $fileOptions['allowedHosts'] ?? [],
-            $fileOptions['maxRemoteSize'] ?? 52428800,
+            $fileOptions['maxRemoteSize'] ?? 52_428_800,
             $fileOptions['curlopts'] ?? [],
             $fileOptions['defaultCurlOpts'] ?? null,
-            $fileOptions['fixedCurlOpts'] ?? null
+            $fileOptions['fixedCurlOpts'] ?? null,
         );
     }
 
@@ -132,6 +134,8 @@ abstract class Output
      * @param float $pageheight Page height in user units.
      *
      * @return string Image PDF page content.
+     *
+     * @throws \Com\Tecnick\Pdf\Image\Exception If the image ID is not found.
      */
     public function getSetImage(
         int $iid,
@@ -139,26 +143,27 @@ abstract class Output
         float $ypos,
         float $width,
         float $height,
-        float $pageheight
+        float $pageheight,
     ): string {
-        if (empty($this->image[$iid])) {
+        $img = $this->image[$iid] ?? null;
+        if ($img === null) {
             throw new ImageException('Unknownn image ID: ' . $iid);
         }
 
         $out = 'q';
         $out .= \sprintf(
             ' %F 0 0 %F %F %F cm',
-            ($width * $this->kunit),
-            ($height * $this->kunit),
-            ($xpos * $this->kunit),
-            (($pageheight - $ypos - $height) * $this->kunit) // reverse coordinate
+            $width * $this->kunit,
+            $height * $this->kunit,
+            $xpos * $this->kunit,
+            ($pageheight - $ypos - $height) * $this->kunit, // reverse coordinate
         );
 
-        if (empty($this->cache[$this->image[$iid]['key']]['mask'])) {
+        if (!isset($this->cache[$img['key']]['mask'])) {
             return $out . ' /IMG' . $iid . ' Do Q' . "\n";
         }
 
-        if (empty($this->cache[$this->image[$iid]['key']]['plain'])) {
+        if (!isset($this->cache[$img['key']]['plain'])) {
             return $out . ' /IMGmask' . $iid . ' Do Q' . "\n";
         }
 
@@ -171,38 +176,49 @@ abstract class Output
      * @param int $pon Current PDF Object Number.
      *
      * @return string PDF code for the images block.
+     *
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception If image object encryption fails.
      */
     public function getOutImagesBlock(int $pon): string
     {
         $this->pon = $pon;
         $out = '';
         foreach ($this->image as $iid => $img) {
-            if (empty($this->cache[$img['key']]['out'])) {
-                if (empty($this->cache[$img['key']]['mask'])) {
-                    $out .= $this->getOutImage($img, $this->cache[$img['key']]);
-                } else {
-                    $out .= $this->getOutImage($img, $this->cache[$img['key']]['mask'], 'mask');
-                    if (!empty($this->cache[$img['key']]['plain'])) {
-                        /** @var ImageBaseData $plain */
+            if (!isset($this->cache[$img['key']]['out'])) {
+                if (isset($this->cache[$img['key']]['mask'])) {
+                    /** @var ImageRawData $mask */
+                    $mask = &$this->cache[$img['key']]['mask'];
+                    $out .= $this->getOutImage($img, $mask, 'mask');
+                    if (isset($this->cache[$img['key']]['plain'])) {
+                        /** @var ImageRawData $plain */
                         $plain = &$this->cache[$img['key']]['plain'];
-                        $out .= $this->getOutImage(
-                            $img,
-                            $plain,
-                            'plain',
-                        );
+                        $out .= $this->getOutImage($img, $plain, 'plain');
                     }
                 }
+
+                if (!isset($this->cache[$img['key']]['mask'])) {
+                    $out .= $this->getOutImage($img, $this->cache[$img['key']]);
+                }
+
+                unset($mask, $plain);
 
                 $this->image[$iid] = $img;
             }
 
-            if (empty($this->cache[$img['key']]['mask']['obj'])) {
+            if (($this->cache[$img['key']]['mask']['obj'] ?? 0) === 0) {
                 $this->xobjdict['IMG' . $img['iid']] = $this->cache[$img['key']]['obj'];
             } else {
-                if (empty($this->cache[$img['key']]['plain']['obj'])) {
-                    $this->xobjdict['IMGmask' . $img['iid']] = $this->cache[$img['key']]['mask']['obj'];
-                } else {
-                    $this->xobjdict['IMGplain' . $img['iid']] = $this->cache[$img['key']]['plain']['obj'];
+                $maskData = $this->cache[$img['key']]['mask'] ?? null;
+                if ($maskData === null) {
+                    $this->xobjdict['IMG' . $img['iid']] = $this->cache[$img['key']]['obj'];
+                    continue;
+                }
+
+                $plainData = $this->cache[$img['key']]['plain'] ?? null;
+                if (($plainData['obj'] ?? 0) === 0) {
+                    $this->xobjdict['IMGmask' . $img['iid']] = (int) $maskData['obj'];
+                } elseif ($plainData !== null) {
+                    $this->xobjdict['IMGplain' . $img['iid']] = (int) $plainData['obj'];
                 }
             }
         }
@@ -221,53 +237,56 @@ abstract class Output
      *          'defprint': bool,
      *          'altimgs'?: array<int, int>,
      *      }  $img  Image reference.
-     * @param ImageBaseData  $data Image raw data.
+     * @param ImageRawData  $data Image raw data.
      * @param string $sub  Sub image ('mask', 'plain' or empty string).
      *
      * @return string PDF Image object.
+     *
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception If image data encryption fails.
      */
-    protected function getOutImage(
-        array &$img,
-        array &$data,
-        string $sub = '',
-    ): string {
-        $out = $this->getOutIcc($data)
-                . $this->getOutPalette($data)
-                . $this->getOutAltImages($img, $data, $sub);
+    protected function getOutImage(array &$img, array &$data, string $sub = ''): string
+    {
+        $out = $this->getOutIcc($data) . $this->getOutPalette($data) . $this->getOutAltImages($img, $data, $sub);
 
         $data['obj'] = ++$this->pon;
 
-        $out .= $data['obj'] . ' 0 obj' . "\n"
+        $out .=
+            $data['obj']
+            . ' 0 obj'
+            . "\n"
             . '<<'
             . ' /Type /XObject'
             . ' /Subtype /Image'
-            . ' /Width ' . $data['width']
-            . ' /Height ' . $data['height']
+            . ' /Width '
+            . $data['width']
+            . ' /Height '
+            . $data['height']
             . $this->getOutColorInfo($data);
 
-        if (! empty($data['exturl'])) {
+        if ($data['exturl']) {
             // external stream
-            $out .= ' /Length 0 /F'
-            . ' <<'
-            . ' /FS /URL /F '
-            . $this->encrypt->escapeDataString(empty($data['exturl']) ? 'false' : 'true', $this->pon)
-            . ' >>';
-            if (! empty($data['filter'])) {
+            $out .=
+                ' /Length 0 /F'
+                . ' <<'
+                . ' /FS /URL /F '
+                . $this->encrypt->escapeDataString('true', $this->pon)
+                . ' >>';
+            if ($data['filter'] !== '') {
                 $out .= ' /FFilter /' . $data['filter'];
             }
 
             $out .= ' >>' . "\n";
         } else {
-            if (! empty($data['filter'])) {
+            if ($data['filter'] !== '') {
                 $out .= ' /Filter /' . $data['filter'];
             }
 
-            if (! empty($data['parms'])) {
+            if ($data['parms'] !== '') {
                 $out .= ' ' . $data['parms'];
             }
 
             // Colour Key Masking
-            if (! empty($data['trns'])) {
+            if ($data['trns'] !== []) {
                 $trns = $this->getOutTransparency($data);
                 if ($trns !== '') {
                     $out .= ' /Mask [ ' . $trns . ']';
@@ -275,10 +294,7 @@ abstract class Output
             }
 
             $stream = $this->encrypt->encryptString($data['data'], $this->pon);
-            $out .= ' /Length ' . \strlen($stream)
-                . '>> stream' . "\n"
-                . $stream . "\n"
-                . 'endstream' . "\n";
+            $out .= ' /Length ' . \strlen($stream) . '>> stream' . "\n" . $stream . "\n" . 'endstream' . "\n";
         }
 
         $out .= 'endobj' . "\n";
@@ -308,7 +324,7 @@ abstract class Output
      */
     public function getXobjectDictByKeys(array $keys): string
     {
-        if (empty($keys)) {
+        if ($keys === []) {
             return '';
         }
 
@@ -316,17 +332,17 @@ abstract class Output
 
         foreach ($keys as $iid) {
             $key = 'IMG' . $iid;
-            if (!empty($this->xobjdict[$key])) {
+            if (isset($this->xobjdict[$key])) {
                 $out .= ' /' . $key . ' ' . $this->xobjdict[$key] . ' 0 R';
                 continue;
             }
             $key = 'IMGplain' . $iid;
-            if (!empty($this->xobjdict[$key])) {
+            if (isset($this->xobjdict[$key])) {
                 $out .= ' /' . $key . ' ' . $this->xobjdict[$key] . ' 0 R';
                 continue;
             }
             $key = 'IMGmask' . $iid;
-            if (!empty($this->xobjdict[$key])) {
+            if (isset($this->xobjdict[$key])) {
                 $out .= ' /' . $key . ' ' . $this->xobjdict[$key] . ' 0 R';
                 continue;
             }
@@ -338,19 +354,26 @@ abstract class Output
     /**
      * Get the PDF output string for ICC object.
      *
-     * @param ImageBaseData $data Image raw data.
+     * @param ImageRawData $data Image raw data.
+     *
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception If ICC profile encryption fails.
      */
     protected function getOutIcc(array &$data): string
     {
-        if (empty($data['icc'])) {
+        if ($data['icc'] === '') {
             return '';
         }
 
         $data['obj_icc'] = ++$this->pon;
-        $out = $data['obj_icc'] . ' 0 obj' . "\n"
+        $out =
+            $data['obj_icc']
+            . ' 0 obj'
+            . "\n"
             . '<<'
-            . ' /N ' . $data['channels']
-            . ' /Alternate /' . $data['colspace'];
+            . ' /N '
+            . $data['channels']
+            . ' /Alternate /'
+            . $data['colspace'];
         $icc = $data['icc'];
         if ($this->compress) {
             $out .= ' /Filter /FlateDecode';
@@ -361,28 +384,38 @@ abstract class Output
         }
 
         $stream = $this->encrypt->encryptString($icc, $this->pon);
-        return $out . (' /Length ' . \strlen($stream)
-            . ' >>'
-            . ' stream' . "\n"
-            . $stream . "\n"
-            . 'endstream' . "\n"
-            . 'endobj' . "\n");
+        return (
+            $out . (
+                ' /Length '
+                . \strlen($stream)
+                . ' >>'
+                . ' stream'
+                . "\n"
+                . $stream
+                . "\n"
+                . 'endstream'
+                . "\n"
+                . 'endobj'
+                . "\n"
+            )
+        );
     }
 
     /**
      * Get the PDF output string for Indexed palette object.
      *
-     * @param ImageBaseData $data Image raw data.
+     * @param ImageRawData $data Image raw data.
+     *
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception If palette encryption fails.
      */
     protected function getOutPalette(array &$data): string
     {
-        if ($data['colspace'] != 'Indexed') {
+        if ($data['colspace'] !== 'Indexed') {
             return '';
         }
 
         $data['obj_pal'] = ++$this->pon;
-        $out = $data['obj_pal'] . ' 0 obj' . "\n"
-            . '<<';
+        $out = $data['obj_pal'] . ' 0 obj' . "\n" . '<<';
         $pal = $data['pal'];
         if ($this->compress) {
             $out .= '/Filter /FlateDecode';
@@ -393,47 +426,60 @@ abstract class Output
         }
 
         $stream = $this->encrypt->encryptString($pal, $this->pon);
-        return $out . (' /Length ' . \strlen($stream)
-            . '>>'
-            . ' stream' . "\n"
-            . $stream . "\n"
-            . 'endstream' . "\n"
-            . 'endobj' . "\n");
+        return (
+            $out . (
+                ' /Length '
+                . \strlen($stream)
+                . '>>'
+                . ' stream'
+                . "\n"
+                . $stream
+                . "\n"
+                . 'endstream'
+                . "\n"
+                . 'endobj'
+                . "\n"
+            )
+        );
     }
 
     /**
      * Get the PDF output string for color and mask information.
      *
-     * @param ImageBaseData $data Image raw data.
+     * @param ImageRawData $data Image raw data.
      */
     protected function getOutColorInfo(array $data): string
     {
         $out = '';
         // set color space
-        if (! empty($data['obj_icc'])) {
+        if ($data['obj_icc'] !== 0) {
             // ICC Colour Space
             $out .= ' /ColorSpace [/ICCBased ' . $data['obj_icc'] . ' 0 R]';
-        } elseif (! empty($data['obj_pal'])) {
+        } elseif ($data['obj_pal'] !== 0) {
             // Indexed Colour Space
-            $out .= ' /ColorSpace [/Indexed /DeviceRGB '
+            $out .=
+                ' /ColorSpace [/Indexed /DeviceRGB '
                 . ((\strlen($data['pal']) / 3) - 1)
-                . ' ' . $data['obj_pal'] . ' 0 R]';
+                . ' '
+                . $data['obj_pal']
+                . ' 0 R]';
         } else {
             // Device Colour Space
             $out .= ' /ColorSpace /' . $data['colspace'];
         }
 
-        if ($data['colspace'] == 'DeviceCMYK') {
+        if ($data['colspace'] === 'DeviceCMYK') {
             $out .= ' /Decode [1 0 1 0 1 0 1 0]';
         }
 
         $out .= ' /BitsPerComponent ' . $data['bits'];
 
-        if (! $data['ismask'] && ! empty($this->cache[$data['key']]['mask']['obj'])) {
-            $out .= ' /SMask ' . $this->cache[$data['key']]['mask']['obj'] . ' 0 R';
+        $maskobj = (int) ($this->cache[$data['key']]['mask']['obj'] ?? 0);
+        if (!$data['ismask'] && $maskobj > 0) {
+            $out .= ' /SMask ' . $maskobj . ' 0 R';
         }
 
-        if (! empty($data['obj_alt'])) {
+        if ($data['obj_alt'] !== 0) {
             // reference to alternate images dictionary
             $out .= ' /Alternates ' . $data['obj_alt'] . ' 0 R';
         }
@@ -452,48 +498,55 @@ abstract class Output
      *          'defprint': bool,
      *          'altimgs'?: array<int, int>,
      *      } $img Image reference.
-     * @param ImageBaseData $data Image raw data.
+     * @param ImageRawData $data Image raw data.
      * @param string $sub Sub image ('mask', 'plain' or empty string).
      */
-    protected function getOutAltImages(
-        array $img,
-        array &$data,
-        string $sub = '',
-    ): string {
-        if ($this->pdfa || empty($img['altimgs']) || ($sub == 'mask')) {
+    protected function getOutAltImages(array $img, array &$data, string $sub = ''): string
+    {
+        if ($this->pdfa || !isset($img['altimgs']) || $img['altimgs'] === [] || $sub === 'mask') {
             return '';
         }
 
         $data['obj_alt'] = ++$this->pon;
 
-        $out = $this->pon . ' 0 obj' . "\n"
-            . '[';
+        $out = $this->pon . ' 0 obj' . "\n" . '[';
         foreach ($img['altimgs'] as $iid) {
-            if (! empty($this->cache[$this->image[$iid]['key']]['obj'])) {
-                $out .= ' << /Image ' . $this->cache[$this->image[$iid]['key']]['obj'] . ' 0 R'
-                    . ' /DefaultForPrinting ' . (empty($this->image[$iid]['defprint']) ? 'false' : 'true')
-                    . ' >>';
+            $altimg = $this->image[$iid] ?? null;
+            if ($altimg === null) {
+                continue;
             }
+
+            $altobj = (int) ($this->cache[$altimg['key']]['obj'] ?? 0);
+            if ($altobj === 0) {
+                continue;
+            }
+
+            $out .=
+                ' << /Image '
+                . $altobj
+                . ' 0 R'
+                . ' /DefaultForPrinting '
+                . ($altimg['defprint'] ? 'true' : 'false')
+                . ' >>';
         }
 
-        return $out . (' ]' . "\n"
-            . 'endobj' . "\n");
+        return $out . (' ]' . "\n" . 'endobj' . "\n");
     }
 
     /**
-     * Get the PDF output string for color and mask information.
+     * Get the PDF output string for color transparency.
      *
-     * @param array{
-     *          'trns': array<int, int>,
-     *        } $data Image raw data.
+     * @param ImageRawData $data Image raw data.
      */
     protected function getOutTransparency(array $data): string
     {
         $trns = '';
         foreach ($data['trns'] as $idx => $val) {
-            if ($val == 0) {
-                $trns .= $idx . ' ' . $idx . ' ';
+            if ($val !== 0) {
+                continue;
             }
+
+            $trns .= $idx . ' ' . $idx . ' ';
         }
 
         return $trns;

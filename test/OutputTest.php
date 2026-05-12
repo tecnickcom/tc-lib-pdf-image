@@ -31,10 +31,15 @@ class OutputTest extends TestUtil
 {
     protected function getTestObject(): \Com\Tecnick\Pdf\Image\Import
     {
-        $encrypt = new \Com\Tecnick\Pdf\Encrypt\Encrypt();
+        $encrypt = $this->getTestEncrypt();
         return new \Com\Tecnick\Pdf\Image\Import(0.75, $encrypt, false);
     }
 
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
     public function testGetObjectNumber(): void
     {
         $import = $this->getTestObject();
@@ -44,18 +49,33 @@ class OutputTest extends TestUtil
         $this->assertGreaterThan(10, $import->getObjectNumber());
     }
 
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
     public function testGetXobjectDictEmpty(): void
     {
         $import = $this->getTestObject();
         $this->assertEquals('', $import->getXobjectDict());
     }
 
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
     public function testGetXobjectDictByKeysEmpty(): void
     {
         $import = $this->getTestObject();
         $this->assertEquals('', $import->getXobjectDictByKeys([]));
     }
 
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
     public function testGetXobjectDictByKeysInvalid(): void
     {
         $import = $this->getTestObject();
@@ -67,6 +87,11 @@ class OutputTest extends TestUtil
         $this->assertEquals('', $result);
     }
 
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
     public function testGetXobjectDictByKeysWithValidImage(): void
     {
         $import = $this->getTestObject();
@@ -78,6 +103,11 @@ class OutputTest extends TestUtil
         $this->assertStringContainsString('IMG' . $iid, $result);
     }
 
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
     public function testGetOutImagesBlockMultiple(): void
     {
         $import = $this->getTestObject();
@@ -89,6 +119,11 @@ class OutputTest extends TestUtil
         $this->assertStringContainsString('XObject', $result);
     }
 
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
     public function testGetOutImagesBlockObjectNumberIncrement(): void
     {
         $import = $this->getTestObject();
@@ -99,6 +134,11 @@ class OutputTest extends TestUtil
         $this->assertGreaterThan(20, $import->getObjectNumber());
     }
 
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
     public function testGetSetImageWithMask(): void
     {
         $import = $this->getTestObject();
@@ -109,6 +149,11 @@ class OutputTest extends TestUtil
         $this->assertStringContainsString('cm /IMGmask' . $iid . ' Do Q', $result);
     }
 
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
     public function testGetSetImageRealOutput(): void
     {
         $import = $this->getTestObject();
@@ -119,6 +164,11 @@ class OutputTest extends TestUtil
         $this->assertStringContainsString('Do Q', $result);
     }
 
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
     public function testGetSetImageWithoutMaskOrPlain(): void
     {
         $import = $this->getTestObject();
@@ -130,6 +180,11 @@ class OutputTest extends TestUtil
         $this->assertStringNotContainsString('IMGmask', $result);
     }
 
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
     public function testGetSetImageWithCoordinates(): void
     {
         $import = $this->getTestObject();
@@ -141,13 +196,23 @@ class OutputTest extends TestUtil
         $this->assertStringContainsString('/IMG' . $iid . ' Do Q', $result);
     }
 
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
     public function testGetSetImageErrorInvalidId(): void
     {
-        $this->bcExpectException('\\' . \Com\Tecnick\Pdf\Image\Exception::class);
+        $this->bcExpectException(\Com\Tecnick\Pdf\Image\Exception::class);
         $import = $this->getTestObject();
         $import->getSetImage(999, 0, 0, 100, 100, 600);
     }
 
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
     public function testGetSetImageMultipleImages(): void
     {
         $import = $this->getTestObject();
@@ -163,6 +228,11 @@ class OutputTest extends TestUtil
         $this->assertStringContainsString('IMG' . $iid2, $result2);
     }
 
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
     public function testGetSetImageVariousCoordinates(): void
     {
         $import = $this->getTestObject();

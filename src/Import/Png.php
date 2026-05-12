@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Png.php
  *
@@ -40,6 +42,9 @@ class Png implements ImageImportInterface
      * @param ImageBaseData $data Image raw data.
      *
      * @return ImageBaseData Image raw data array.
+     *
+     * @throws \Com\Tecnick\Pdf\Image\Exception If the image is invalid.
+     * @throws \RangeException If the byte offset is out of range.
      */
     public function getData(array $data): array
     {
@@ -51,6 +56,7 @@ class Png implements ImageImportInterface
         if (\substr($data['raw'], $offset, 8) !== \chr(137) . 'PNG' . \chr(13) . \chr(10) . \chr(26) . \chr(10)) {
             // @codeCoverageIgnoreStart
             throw new ImageException('Not a PNG image');
+
             // @codeCoverageIgnoreEnd
         }
 
@@ -63,14 +69,15 @@ class Png implements ImageImportInterface
 
         // check compression, filter and interlacing settings
         if (
-            ($byte->getByte($offset - 3) != 0)
-            || ($byte->getByte($offset - 2) != 0)
-            || ($byte->getByte($offset - 1) != 0)
+            $byte->getByte($offset - 3) !== 0
+            || $byte->getByte($offset - 2) !== 0
+            || $byte->getByte($offset - 1) !== 0
         ) {
-            if (! empty($data['recoded'])) {
+            if ($data['recoded']) {
                 // this image has been already re-encoded
                 // @codeCoverageIgnoreStart
                 throw new ImageException('Unsupported feature');
+
                 // @codeCoverageIgnoreEnd
             }
 
@@ -86,9 +93,13 @@ class Png implements ImageImportInterface
             return $data;
         }
 
-        $data['parms'] = '/DecodeParms << /Predictor 15 /Colors ' . $data['channels']
-            . ' /BitsPerComponent ' . $data['bits']
-            . ' /Columns ' . $data['width']
+        $data['parms'] =
+            '/DecodeParms << /Predictor 15 /Colors '
+            . $data['channels']
+            . ' /BitsPerComponent '
+            . $data['bits']
+            . ' /Columns '
+            . $data['width']
             . ' >>';
 
         $offset += 4;
@@ -105,13 +116,17 @@ class Png implements ImageImportInterface
      * @param int   $offset Current byte offset.
      *
      * @return ImageBaseData Image raw data array.
+     *
+     * @throws \Com\Tecnick\Pdf\Image\Exception If the image is invalid.
+     * @throws \RangeException If the byte offset is out of range.
      */
     protected function getIhdrChunk(array $data, int &$offset): array
     {
         $byte = new Byte($data['raw']);
-        if (\substr($data['raw'], $offset, 4) != 'IHDR') {
+        if (\substr($data['raw'], $offset, 4) !== 'IHDR') {
             // @codeCoverageIgnoreStart
             throw new ImageException('Invalid PNG image');
+
             // @codeCoverageIgnoreEnd
         }
 
@@ -124,7 +139,7 @@ class Png implements ImageImportInterface
         ++$offset;
         $chc = $byte->getByte($offset); // channels code
         ++$offset;
-        $data['channels'] = (($chc == 2) ? 3 : 1);
+        $data['channels'] = $chc === 2 ? 3 : 1;
         $chcmap = [
             0 => 'DeviceGray',
             2 => 'DeviceRGB',
@@ -137,6 +152,7 @@ class Png implements ImageImportInterface
         } else {
             // @codeCoverageIgnoreStart
             throw new ImageException('Unknownn color mode');
+
             // @codeCoverageIgnoreEnd
         }
 
@@ -150,6 +166,9 @@ class Png implements ImageImportInterface
      * @param int   $offset Current byte offset.
      *
      * @return ImageBaseData Image raw data array.
+     *
+     * @throws \Com\Tecnick\Pdf\Image\Exception If the image is invalid.
+     * @throws \RangeException If the byte offset is out of range.
      */
     protected function getChunks(array $data, int $offset): array
     {
@@ -158,15 +177,15 @@ class Png implements ImageImportInterface
             $offset += 4;
             $type = \substr($data['raw'], $offset, 4);
             $offset += 4;
-            if ($type == 'PLTE') {
+            if ($type === 'PLTE') {
                 $data = $this->getPlteChunk($data, $offset, $len);
-            } elseif ($type == 'tRNS') {
+            } elseif ($type === 'tRNS') {
                 $data = $this->getTrnsChunk($data, $offset, $len);
-            } elseif ($type == 'IDAT') {
+            } elseif ($type === 'IDAT') {
                 $data = $this->getIdatChunk($data, $offset, $len);
-            } elseif ($type == 'iCCP') {
+            } elseif ($type === 'iCCP') {
                 $data = $this->getIccpChunk($byte, $data, $offset, $len);
-            } elseif ($type == 'IEND') {
+            } elseif ($type === 'IEND') {
                 // The image trailer chunk (IEND) must be the final chunk
                 // and marks the end of the PNG file or data stream.
                 break;
@@ -176,9 +195,10 @@ class Png implements ImageImportInterface
             }
         }
 
-        if (($data['colspace'] == 'Indexed') && (empty($data['pal']))) {
+        if ($data['colspace'] === 'Indexed' && $data['pal'] === '') {
             // @codeCoverageIgnoreStart
             throw new ImageException('The color palette is missing');
+
             // @codeCoverageIgnoreEnd
         }
 
@@ -219,10 +239,10 @@ class Png implements ImageImportInterface
         // read transparency info
         $trns = \substr($data['raw'], $offset, $len);
         $offset += $len;
-        if ($data['colspace'] == 'DeviceGray') {
+        if ($data['colspace'] === 'DeviceGray') {
             // DeviceGray
             $data['trns'][] = \ord($trns[1]);
-        } elseif ($data['colspace'] == 'DeviceRGB') {
+        } elseif ($data['colspace'] === 'DeviceRGB') {
             // DeviceRGB
             $data['trns'][] = \ord($trns[1]);
             $data['trns'][] = \ord($trns[3]);
@@ -265,28 +285,28 @@ class Png implements ImageImportInterface
      * @param int   $len    NUmber of bytes in this chunk.
      *
      * @return ImageBaseData Image raw data array.
+     *
+     * @throws \Com\Tecnick\Pdf\Image\Exception If the filter method is unknown.
+     * @throws \RangeException If attempting to read beyond available bytes.
      */
-    protected function getIccpChunk(
-        Byte $byte,
-        array $data,
-        int &$offset,
-        int $len,
-    ): array {
+    protected function getIccpChunk(Byte $byte, array $data, int &$offset, int $len): array
+    {
         // skip profile name
         $pos = 0;
-        while (($byte->getByte($offset++) != 0) && ($pos < 80)) {
+        while ($byte->getByte($offset++) !== 0 && $pos < 80) {
             ++$pos;
         }
 
         // get compression method
-        if ($byte->getByte($offset++) != 0) {
+        if ($byte->getByte($offset++) !== 0) {
             // @codeCoverageIgnoreStart
             throw new ImageException('Unknownn filter method');
+
             // @codeCoverageIgnoreEnd
         }
 
         // read ICC Color Profile
-        $len -= ($pos + 2);
+        $len -= $pos + 2;
         $icc = \gzuncompress(\substr($data['raw'], $offset, $len));
         if ($icc !== false) {
             $data['icc'] = $icc;

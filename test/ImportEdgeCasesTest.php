@@ -31,24 +31,39 @@ class ImportEdgeCasesTest extends TestUtil
 {
     protected function getTestObject(): \Com\Tecnick\Pdf\Image\Import
     {
-        $encrypt = new \Com\Tecnick\Pdf\Encrypt\Encrypt();
+        $encrypt = $this->getTestEncrypt();
         return new \Com\Tecnick\Pdf\Image\Import(0.75, $encrypt, false);
     }
 
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
     public function testAddWithZeroWidth(): void
     {
-        $this->bcExpectException('\\' . \Com\Tecnick\Pdf\Image\Exception::class);
+        $this->bcExpectException(\Com\Tecnick\Pdf\Image\Exception::class);
         $import = $this->getTestObject();
         $import->add(__DIR__ . '/images/200x100_RGB.png', 0, 50);
     }
 
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
     public function testAddWithZeroHeight(): void
     {
-        $this->bcExpectException('\\' . \Com\Tecnick\Pdf\Image\Exception::class);
+        $this->bcExpectException(\Com\Tecnick\Pdf\Image\Exception::class);
         $import = $this->getTestObject();
         $import->add(__DIR__ . '/images/200x100_RGB.png', 100, 0);
     }
 
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
     public function testAddWithQualityLow(): void
     {
         $import = $this->getTestObject();
@@ -56,6 +71,11 @@ class ImportEdgeCasesTest extends TestUtil
         $this->assertGreaterThan(0, $iid);
     }
 
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
     public function testAddWithQualityHigh(): void
     {
         $import = $this->getTestObject();
@@ -63,6 +83,11 @@ class ImportEdgeCasesTest extends TestUtil
         $this->assertGreaterThan(0, $iid);
     }
 
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
     public function testAddWithQualityExceeding100(): void
     {
         $import = $this->getTestObject();
@@ -71,6 +96,11 @@ class ImportEdgeCasesTest extends TestUtil
         $this->assertGreaterThan(0, $iid);
     }
 
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
     public function testAddWithNegativeQuality(): void
     {
         $import = $this->getTestObject();
@@ -79,6 +109,11 @@ class ImportEdgeCasesTest extends TestUtil
         $this->assertGreaterThan(0, $iid);
     }
 
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
     public function testAddWithMaskAndAlphaParameters(): void
     {
         $import = $this->getTestObject();
@@ -87,6 +122,11 @@ class ImportEdgeCasesTest extends TestUtil
         $this->assertGreaterThan(0, $iid);
     }
 
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
     public function testAddWithDefprintParameter(): void
     {
         $import = $this->getTestObject();
@@ -95,6 +135,11 @@ class ImportEdgeCasesTest extends TestUtil
         $this->assertGreaterThan(0, $iid);
     }
 
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
     public function testAddWithAlternateImages(): void
     {
         $import = $this->getTestObject();
@@ -105,6 +150,11 @@ class ImportEdgeCasesTest extends TestUtil
         $this->assertGreaterThan(0, $iid3);
     }
 
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
     public function testAddImageFromStringData(): void
     {
         $import = $this->getTestObject();
@@ -116,6 +166,11 @@ class ImportEdgeCasesTest extends TestUtil
         $this->assertGreaterThan(0, $iid);
     }
 
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
     public function testGetKeyConsistency(): void
     {
         $import = $this->getTestObject();
@@ -125,6 +180,11 @@ class ImportEdgeCasesTest extends TestUtil
         $this->assertEquals($key1, $key2);
     }
 
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
     public function testGetKeyDifference(): void
     {
         $import = $this->getTestObject();
@@ -134,6 +194,11 @@ class ImportEdgeCasesTest extends TestUtil
         $this->assertNotEquals($key1, $key2);
     }
 
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
     public function testMultipleAddOperations(): void
     {
         $import = $this->getTestObject();
@@ -146,6 +211,11 @@ class ImportEdgeCasesTest extends TestUtil
         $this->assertEquals(3, $iid3);
     }
 
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
     public function testRepeatedImageAddition(): void
     {
         $import = $this->getTestObject();
@@ -158,6 +228,11 @@ class ImportEdgeCasesTest extends TestUtil
         $this->assertEquals(2, $iid2);
     }
 
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
     public function testAddWithResizeDownscale(): void
     {
         $import = $this->getTestObject();
@@ -166,6 +241,11 @@ class ImportEdgeCasesTest extends TestUtil
         $this->assertGreaterThan(0, $iid);
     }
 
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
     public function testAddWithResizeUpscale(): void
     {
         $import = $this->getTestObject();
@@ -174,6 +254,11 @@ class ImportEdgeCasesTest extends TestUtil
         $this->assertGreaterThan(0, $iid);
     }
 
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
     public function testGetSetImageAfterMultipleAdds(): void
     {
         $import = $this->getTestObject();
@@ -190,16 +275,26 @@ class ImportEdgeCasesTest extends TestUtil
         $this->assertNotEmpty($result3);
     }
 
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
     public function testInvalidImageFile(): void
     {
-        $this->bcExpectException('\\' . \Com\Tecnick\Pdf\Image\Exception::class);
+        $this->bcExpectException(\Com\Tecnick\Pdf\Image\Exception::class);
         $import = $this->getTestObject();
         $import->add(__DIR__ . '/images/nonexistent.png');
     }
 
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
     public function testInvalidImageData(): void
     {
-        $this->bcExpectException('\\' . \Com\Tecnick\Pdf\Image\Exception::class);
+        $this->bcExpectException(\Com\Tecnick\Pdf\Image\Exception::class);
         $import = $this->getTestObject();
         $import->add('@invalidbinarydata');
     }
