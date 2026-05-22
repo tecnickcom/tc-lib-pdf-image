@@ -29,9 +29,9 @@
         "php": ">=8.2",
         "ext-gd": "*",
         "ext-zlib": "*",
-        "tecnickcom/tc-lib-file": "^2.7",
+        "tecnickcom/tc-lib-file": "^2.8",
         "tecnickcom/tc-lib-color": "^2.7",
-        "tecnickcom/tc-lib-pdf-encrypt": "^2.4"
+        "tecnickcom/tc-lib-pdf-encrypt": "^2.5"
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
