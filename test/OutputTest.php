@@ -29,6 +29,14 @@ namespace Test;
  */
 class OutputTest extends TestUtil
 {
+    /**
+     * @throws \RuntimeException
+     */
+    public function throwWithFileHelperCallbackError(): void
+    {
+        throw new \RuntimeException('withFileHelper callback error');
+    }
+
     protected function getTestObject(): \Com\Tecnick\Pdf\Image\Import
     {
         $encrypt = $this->getTestEncrypt();
@@ -47,6 +55,56 @@ class OutputTest extends TestUtil
         $import->add(__DIR__ . '/images/200x100_RGB.png');
         $import->getOutImagesBlock(10);
         $this->assertGreaterThan(10, $import->getObjectNumber());
+    }
+
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
+    public function testWithFileHelperRestoresAfterSuccess(): void
+    {
+        $import = $this->getTestObject();
+        $fileHelperProp = new \ReflectionProperty($import, 'fileHelper');
+        /** @var \Com\Tecnick\File\File $originalFileHelper */
+        $originalFileHelper = $fileHelperProp->getValue($import);
+
+        $tempFileHelper = new \Com\Tecnick\File\File(allowedHosts: ['localhost'], allowedPaths: ['*']);
+
+        $result = $import->withFileHelper($tempFileHelper, function () use (
+            $import,
+            $fileHelperProp,
+            $tempFileHelper,
+        ): string {
+            $this->assertSame($tempFileHelper, $fileHelperProp->getValue($import));
+            return 'ok';
+        });
+
+        $this->assertSame('ok', $result);
+        $this->assertSame($originalFileHelper, $fileHelperProp->getValue($import));
+    }
+
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
+    public function testWithFileHelperRestoresAfterException(): void
+    {
+        $import = $this->getTestObject();
+        $fileHelperProp = new \ReflectionProperty($import, 'fileHelper');
+        /** @var \Com\Tecnick\File\File $originalFileHelper */
+        $originalFileHelper = $fileHelperProp->getValue($import);
+
+        $tempFileHelper = new \Com\Tecnick\File\File(allowedHosts: ['example.test'], allowedPaths: ['*']);
+
+        $this->bcExpectException(\RuntimeException::class);
+
+        try {
+            $import->withFileHelper($tempFileHelper, [$this, 'throwWithFileHelperCallbackError']);
+        } finally {
+            $this->assertSame($originalFileHelper, $fileHelperProp->getValue($import));
+        }
     }
 
     /**

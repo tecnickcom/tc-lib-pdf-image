@@ -110,6 +110,28 @@ abstract class Output
     }
 
     /**
+     * Run a callback with a temporary file helper.
+     *
+     * @template TResult
+     *
+     * @param ObjFile $fileHelper Temporary file helper to use while the callback executes.
+     * @param callable(): TResult $callback Callback executed with the temporary file helper.
+     *
+     * @return TResult
+     */
+    public function withFileHelper(ObjFile $fileHelper, callable $callback): mixed
+    {
+        $previousFileHelper = $this->fileHelper;
+        $this->fileHelper = $fileHelper;
+
+        try {
+            return $callback();
+        } finally {
+            $this->fileHelper = $previousFileHelper;
+        }
+    }
+
+    /**
      * Get the PDF output string to print the specified image ID.
      *
      * @param int   $iid        Image ID.
