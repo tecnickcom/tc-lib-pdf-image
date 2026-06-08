@@ -34,7 +34,7 @@ class ImportTest extends TestUtil
     protected function getTestObject(): \Com\Tecnick\Pdf\Image\Import
     {
         $encrypt = $this->getTestEncrypt();
-        return new \Com\Tecnick\Pdf\Image\Import(0.75, $encrypt, false);
+        return new \Com\Tecnick\Pdf\Image\Import(0.75, $encrypt, $this->getTestFileHelper());
     }
 
     /**
@@ -54,35 +54,41 @@ class ImportTest extends TestUtil
      * @throws \Com\Tecnick\File\Exception
      * @throws \Com\Tecnick\Pdf\Encrypt\Exception
      */
-    public function testConstructorPassesFileOptionsToImageFileHelper(): void
+    public function testConstructorUsesConfiguredFileHelper(): void
     {
         $encrypt = $this->getTestEncrypt();
         $allowedHosts = ['localhost', 'example.test'];
+        $allowedPaths = [__DIR__ . '/images'];
         $maxRemoteSize = 10485760;
         $curlopts = [CURLOPT_TIMEOUT => 5];
         $defaultCurlOpts = [CURLOPT_TIMEOUT => 12];
         $fixedCurlOpts = [CURLOPT_SSL_VERIFYHOST => 2, CURLOPT_SSL_VERIFYPEER => true];
 
-        $import = new \Com\Tecnick\Pdf\Image\Import(0.75, $encrypt, false, true, [
-            'allowedHosts' => $allowedHosts,
-            'maxRemoteSize' => $maxRemoteSize,
-            'curlopts' => $curlopts,
-            'defaultCurlOpts' => $defaultCurlOpts,
-            'fixedCurlOpts' => $fixedCurlOpts,
-        ]);
+        $fileHelper = new \Com\Tecnick\File\File(
+            allowedHosts: $allowedHosts,
+            maxRemoteSize: $maxRemoteSize,
+            curlopts: $curlopts,
+            defaultCurlOpts: $defaultCurlOpts,
+            fixedCurlOpts: $fixedCurlOpts,
+            allowedPaths: $allowedPaths,
+        );
 
-        $method = new \ReflectionProperty($import, 'file');
+        $import = new \Com\Tecnick\Pdf\Image\Import(0.75, $encrypt, $fileHelper);
+
+        $method = new \ReflectionProperty($import, 'fileHelper');
         /** @var \Com\Tecnick\File\File $file */
         $file = $method->getValue($import);
 
         $ref = new \ReflectionClass($file);
         $allowedHostsProp = $ref->getProperty('allowedHosts');
+        $allowedPathsProp = $ref->getProperty('allowedPaths');
         $maxRemoteSizeProp = $ref->getProperty('maxRemoteSize');
         $curloptsProp = $ref->getProperty('curlopts');
         $defaultProp = $ref->getProperty('defaultCurlOpts');
         $fixedProp = $ref->getProperty('fixedCurlOpts');
 
         $this->assertSame($allowedHosts, $allowedHostsProp->getValue($file));
+        $this->assertSame($allowedPaths, $allowedPathsProp->getValue($file));
         $this->assertSame($maxRemoteSize, $maxRemoteSizeProp->getValue($file));
         $this->assertSame($curlopts, $curloptsProp->getValue($file));
         $this->assertSame($defaultCurlOpts, $defaultProp->getValue($file));

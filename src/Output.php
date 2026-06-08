@@ -83,36 +83,22 @@ abstract class Output
     protected array $cache = [];
 
     /**
-     * File helper used to load image sources.
-     */
-    protected ObjFile $file;
-
-    /**
      * Initialize images data.
      *
-     * @param float   $kunit    Unit of measure conversion ratio.
-     * @param Encrypt $encrypt Encrypt object.
-     * @param bool    $pdfa     True if we are in PDF/A mode.
-     * @param bool    $compress Set to false to disable stream compression.
-     * @param TFileOptions|null $fileOptions Optional configuration for the image file helper.
+     * @param float   $kunit      Unit of measure conversion ratio.
+     * @param Encrypt $encrypt    Encrypt object.
+     * @param ObjFile $fileHelper File helper for image loading and writing.
+     * @param bool    $pdfa       True if we are in PDF/A mode.
+     * @param bool    $compress   Set to false to disable stream compression.
      */
     public function __construct(
         protected float $kunit,
-        /**
-         * Encrypt object.
-         */
         protected Encrypt $encrypt,
+        protected ObjFile $fileHelper,
         protected bool $pdfa = false,
         protected bool $compress = true,
-        ?array $fileOptions = null,
     ) {
-        $this->file = new ObjFile(
-            $fileOptions['allowedHosts'] ?? [],
-            $fileOptions['maxRemoteSize'] ?? 52_428_800,
-            $fileOptions['curlopts'] ?? [],
-            $fileOptions['defaultCurlOpts'] ?? null,
-            $fileOptions['fixedCurlOpts'] ?? null,
-        );
+        $this->fileHelper = $fileHelper;
     }
 
     /**

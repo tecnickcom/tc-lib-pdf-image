@@ -32,7 +32,7 @@ class ImportEdgeCasesTest extends TestUtil
     protected function getTestObject(): \Com\Tecnick\Pdf\Image\Import
     {
         $encrypt = $this->getTestEncrypt();
-        return new \Com\Tecnick\Pdf\Image\Import(0.75, $encrypt, false);
+        return new \Com\Tecnick\Pdf\Image\Import(0.75, $encrypt, $this->getTestFileHelper());
     }
 
     /**
@@ -57,6 +57,38 @@ class ImportEdgeCasesTest extends TestUtil
         $this->bcExpectException(\Com\Tecnick\Pdf\Image\Exception::class);
         $import = $this->getTestObject();
         $import->add(__DIR__ . '/images/200x100_RGB.png', 100, 0);
+    }
+
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
+    public function testAddWithOnlyWidthKeepsAspectRatio(): void
+    {
+        $import = $this->getTestObject();
+        $import->add(__DIR__ . '/images/200x100_RGB.png', 100, null);
+
+        $key = $import->getKey(__DIR__ . '/images/200x100_RGB.png', 100, 0, 100);
+        $data = $import->getImageDataByKey($key);
+        $this->assertSame(100, $data['width']);
+        $this->assertSame(50, $data['height']);
+    }
+
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
+    public function testAddWithOnlyHeightKeepsAspectRatio(): void
+    {
+        $import = $this->getTestObject();
+        $import->add(__DIR__ . '/images/200x100_RGB.png', null, 50);
+
+        $key = $import->getKey(__DIR__ . '/images/200x100_RGB.png', 0, 50, 100);
+        $data = $import->getImageDataByKey($key);
+        $this->assertSame(100, $data['width']);
+        $this->assertSame(50, $data['height']);
     }
 
     /**

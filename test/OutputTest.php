@@ -32,7 +32,7 @@ class OutputTest extends TestUtil
     protected function getTestObject(): \Com\Tecnick\Pdf\Image\Import
     {
         $encrypt = $this->getTestEncrypt();
-        return new \Com\Tecnick\Pdf\Image\Import(0.75, $encrypt, false);
+        return new \Com\Tecnick\Pdf\Image\Import(0.75, $encrypt, $this->getTestFileHelper());
     }
 
     /**

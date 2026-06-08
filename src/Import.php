@@ -251,17 +251,7 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
         $data = $this->getRawData($image);
         $data['key'] = $imgkey;
 
-        if ($width === null) {
-            $width = $data['width'];
-        }
-
-        $width = \max(0, (int) $width);
-
-        if ($height === null) {
-            $height = $data['height'];
-        }
-
-        $height = \max(0, (int) $height);
+        [$width, $height] = $this->resolveDimensions($data, $width, $height);
 
         if (!$data['native'] || $width !== $data['width'] || $height !== $data['height']) {
             $data = $this->getResizedRawData($this->getBaseData($data), $width, $height, true, $quality);
@@ -269,28 +259,106 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
 
         $data = $this->getData($data, $width, $height, $quality);
 
-        $basedata = $this->getBaseData($data);
-
-        if ($ismask) {
-            $data['mask'] = $basedata;
-        } elseif ($data['splitalpha']) {
-            // create 2 separate images: plain + mask
-            $plain = $this->getResizedRawData($basedata, $width, $height, false, $quality);
-            $plain = $this->getData($plain, $width, $height, $quality);
-            $plainbase = $this->getBaseData($plain);
-            $data['plain'] = $plainbase;
-
-            $mask = $this->getAlphaChannelRawData($basedata);
-            $mask = $this->getData($mask, $width, $height, $quality);
-            $maskbase = $this->getBaseData($mask);
-            $mask = $maskbase;
-            $mask['colspace'] = 'DeviceGray';
-            $data['mask'] = $mask;
-        }
+        $data = $this->enrichMaskData($data, $width, $height, $quality, $ismask);
 
         // store data in cache
         $this->cache[$imgkey] = $data;
         return $data;
+    }
+
+    /**
+     * Resolve target image dimensions preserving aspect ratio when one side is omitted.
+     *
+     * @param ImageRawData $data Image raw data.
+     *
+     * @return array{0: int, 1: int}
+     */
+    private function resolveDimensions(array $data, ?int $width, ?int $height): array
+    {
+        $srcwidth = $data['width'];
+        $srcheight = $data['height'];
+
+        if ($width !== null && $height === null && $srcwidth > 0) {
+            $height = (int) \round(((float) $width * (float) $srcheight) / (float) $srcwidth);
+        }
+
+        if ($height !== null && $width === null && $srcheight > 0) {
+            $width = (int) \round(((float) $height * (float) $srcwidth) / (float) $srcheight);
+        }
+
+        if ($width === null) {
+            $width = $data['width'];
+        }
+
+        if ($height === null) {
+            $height = $data['height'];
+        }
+
+        return [
+            \max(0, (int) $width),
+            \max(0, (int) $height),
+        ];
+    }
+
+    /**
+     * Add plain/mask variants when required by mask mode or alpha splitting.
+     *
+     * @param ImageRawData $data Image raw data.
+     *
+     * @return ImageRawData
+     *
+     * @throws \Com\Tecnick\Pdf\Image\Exception If the image cannot be imported.
+     */
+    private function enrichMaskData(array $data, int $width, int $height, int $quality, bool $ismask): array
+    {
+        $basedata = $this->getBaseData($data);
+
+        if ($ismask) {
+            $data['mask'] = $basedata;
+            return $data;
+        }
+
+        if (!$data['splitalpha']) {
+            return $data;
+        }
+
+        // create 2 separate images: plain + mask
+        $data['plain'] = $this->createPlainImage($basedata, $width, $height, $quality);
+        $data['mask'] = $this->createMaskImage($basedata, $width, $height, $quality);
+
+        return $data;
+    }
+
+    /**
+     * @param ImageBaseData $basedata Image base data.
+     *
+     * @return ImageBaseData
+     *
+     * @throws \Com\Tecnick\Pdf\Image\Exception If the image cannot be imported.
+     */
+    private function createPlainImage(array $basedata, int $width, int $height, int $quality): array
+    {
+        $plain = $this->getResizedRawData($basedata, $width, $height, false, $quality);
+        $plain = $this->getData($plain, $width, $height, $quality);
+
+        return $this->getBaseData($plain);
+    }
+
+    /**
+     * @param ImageBaseData $basedata Image base data.
+     *
+     * @return ImageBaseData
+     *
+     * @throws \Com\Tecnick\Pdf\Image\Exception If the image cannot be imported.
+     */
+    private function createMaskImage(array $basedata, int $width, int $height, int $quality): array
+    {
+        $mask = $this->getAlphaChannelRawData($basedata);
+        $mask = $this->getData($mask, $width, $height, $quality);
+        $mask = $this->getBaseData($mask);
+        $mask['colspace'] = 'DeviceGray';
+
+        return $mask;
     }
 
     /**
@@ -439,7 +507,7 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
         }
 
         $data['file'] = $image;
-        $raw = $this->file->getFileData($image);
+        $raw = $this->fileHelper->getFileData($image);
         if ($raw === false) {
             throw new ImageException('Unable to read image file: ' . $image);
         }

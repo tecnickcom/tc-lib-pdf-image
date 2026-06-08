@@ -74,7 +74,13 @@ class ImportOutputPngEdgeCasesTest extends TestUtil
 
     protected function getImportHarness(bool $pdfa = false): ImportProtectedMethodsHarness
     {
-        return new ImportProtectedMethodsHarness(0.75, $this->getTestEncrypt(), $pdfa, false);
+        return new ImportProtectedMethodsHarness(
+            0.75,
+            $this->getTestEncrypt(),
+            $this->getTestFileHelper(),
+            $pdfa,
+            false,
+        );
     }
 
     /**

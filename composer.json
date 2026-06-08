@@ -29,7 +29,7 @@
         "php": ">=8.2",
         "ext-gd": "*",
         "ext-zlib": "*",
-        "tecnickcom/tc-lib-file": "^2.8",
+        "tecnickcom/tc-lib-file": "^3.0",
         "tecnickcom/tc-lib-color": "^2.7",
         "tecnickcom/tc-lib-pdf-encrypt": "^2.5"
     },

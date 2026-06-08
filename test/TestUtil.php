@@ -31,6 +31,11 @@ use PHPUnit\Framework\TestCase;
  */
 class TestUtil extends TestCase
 {
+    protected function getTestFileHelper(): \Com\Tecnick\File\File
+    {
+        return new \Com\Tecnick\File\File(allowedHosts: ['*'], allowedPaths: ['*']);
+    }
+
     protected function getTestEncrypt(): \Com\Tecnick\Pdf\Encrypt\Encrypt
     {
         return new class extends \Com\Tecnick\Pdf\Encrypt\Encrypt {

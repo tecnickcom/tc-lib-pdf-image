@@ -67,11 +67,30 @@ composer require tecnickcom/tc-lib-pdf-image
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-$img = new \Com\Tecnick\Pdf\Image\Import();
+$encrypt = new \Com\Tecnick\Pdf\Encrypt\Encrypt();
+$fileHelper = new \Com\Tecnick\File\File();
+
+$img = new \Com\Tecnick\Pdf\Image\Import(
+	kunit: 1.0,
+	encrypt: $encrypt,
+	fileHelper: $fileHelper,
+);
 $imageId = $img->add('/path/to/image.png');
 
 var_dump($imageId);
 ```
+
+You can configure the `\Com\Tecnick\File\File` helper with host/path allowlists:
+
+```php
+$fileHelper = new \Com\Tecnick\File\File(
+	allowedHosts: ['example.com', 'cdn.example.com'],
+	allowedPaths: ['/srv/app/images', __DIR__ . '/images'],
+);
+```
+
+For full file-loading options, see the `tc-lib-file` documentation:
+<https://tcpdf.org/docs/srcdoc/tc-lib-file>
 
 ---
 
