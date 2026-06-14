@@ -330,4 +330,92 @@ class ImportEdgeCasesTest extends TestUtil
         $import = $this->getTestObject();
         $import->add('@invalidbinarydata');
     }
+
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
+    public function testGetImageDimensionsByKeyReturnsOriginal(): void
+    {
+        $import = $this->getTestObject();
+        $image = __DIR__ . '/images/200x100_RGB.png';
+        $import->add($image);
+        $key = $import->getKey($image, 0, 0, 100);
+
+        $this->assertSame(['width' => 200, 'height' => 100], $import->getImageDimensionsByKey($key));
+    }
+
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
+    public function testGetImageDimensionsByKeyDerivesHeightFromWidth(): void
+    {
+        $import = $this->getTestObject();
+        $image = __DIR__ . '/images/200x100_RGB.png';
+        $import->add($image);
+        $key = $import->getKey($image, 0, 0, 100);
+
+        $this->assertSame(['width' => 100, 'height' => 50], $import->getImageDimensionsByKey($key, 100));
+    }
+
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
+    public function testGetImageDimensionsByKeyDerivesWidthFromHeight(): void
+    {
+        $import = $this->getTestObject();
+        $image = __DIR__ . '/images/200x100_RGB.png';
+        $import->add($image);
+        $key = $import->getKey($image, 0, 0, 100);
+
+        $this->assertSame(['width' => 100, 'height' => 50], $import->getImageDimensionsByKey($key, 0, 50));
+    }
+
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
+    public function testGetImageDimensionsByKeyKeepsBothWhenSpecified(): void
+    {
+        $import = $this->getTestObject();
+        $image = __DIR__ . '/images/200x100_RGB.png';
+        $import->add($image);
+        $key = $import->getKey($image, 0, 0, 100);
+
+        $this->assertSame(['width' => 80, 'height' => 80], $import->getImageDimensionsByKey($key, 80, 80));
+    }
+
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
+    public function testGetImageDimensionsByKeyFitWithinBox(): void
+    {
+        $import = $this->getTestObject();
+        $image = __DIR__ . '/images/200x100_RGB.png';
+        $import->add($image);
+        $key = $import->getKey($image, 0, 0, 100);
+
+        // box 80x80, source 200x100: scale = min(0.4, 0.8) = 0.4 => 80x40
+        $this->assertSame(['width' => 80, 'height' => 40], $import->getImageDimensionsByKey($key, 80, 80, true));
+    }
+
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
+    public function testGetImageDimensionsByKeyUnknownKeyThrows(): void
+    {
+        $this->bcExpectException(\Com\Tecnick\Pdf\Image\Exception::class);
+        $import = $this->getTestObject();
+        $import->getImageDimensionsByKey('nonexistent-key');
+    }
 }

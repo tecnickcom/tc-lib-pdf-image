@@ -219,6 +219,44 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
     }
 
     /**
+     * Resolve the image dimensions for a cached image.
+     *
+     * - If both $width and $height are zero, the original image dimensions are returned.
+     * - If only one of $width and $height is greater than zero, the other is
+     *   calculated preserving the original aspect ratio.
+     * - If both are greater than zero, they are returned as-is, unless $fit is
+     *   true, in which case the image is scaled to fit within the $width x $height
+     *   bounding box preserving the original aspect ratio.
+     *
+     * @param string $key    Image key.
+     * @param int    $width  Target width in pixels (0 = unspecified).
+     * @param int    $height Target height in pixels (0 = unspecified).
+     * @param bool   $fit    If true and both sides are specified, scale to fit
+     *                       within the bounding box preserving the aspect ratio.
+     *
+     * @return array{width: int, height: int} Image dimensions in pixels.
+     *
+     * @throws \Com\Tecnick\Pdf\Image\Exception If the key is not found.
+     */
+    public function getImageDimensionsByKey(string $key, int $width = 0, int $height = 0, bool $fit = false): array
+    {
+        $data = $this->getImageDataByKey($key);
+
+        [$width, $height] = $this->scaleToAspect(
+            $data['width'],
+            $data['height'],
+            $width > 0 ? $width : null,
+            $height > 0 ? $height : null,
+            $fit,
+        );
+
+        return [
+            'width' => $width,
+            'height' => $height,
+        ];
+    }
+
+    /**
      * Import the original image raw data.
      *
      * @param string $image   Image file name, URL or a '@' character followed by the image data string.
@@ -269,34 +307,94 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
     /**
      * Resolve target image dimensions preserving aspect ratio when one side is omitted.
      *
-     * @param ImageRawData $data Image raw data.
+     * @param ImageRawData $data   Image raw data.
+     * @param ?int         $width  Target width in pixels (null = unspecified, derive from aspect ratio).
+     * @param ?int         $height Target height in pixels (null = unspecified, derive from aspect ratio).
      *
      * @return array{0: int, 1: int}
      */
     private function resolveDimensions(array $data, ?int $width, ?int $height): array
     {
-        $srcwidth = $data['width'];
-        $srcheight = $data['height'];
+        return $this->scaleToAspect($data['width'], $data['height'], $width, $height);
+    }
+
+    /**
+     * Scale target dimensions against a source size, preserving the aspect ratio.
+     *
+     * - If both $width and $height are null (unspecified), the source dimensions
+     *   are returned.
+     * - If only one side is specified, the other is derived from the source aspect
+     *   ratio.
+     * - If both sides are specified, they are returned as-is, unless $fit is true,
+     *   in which case the result is scaled to fit within the $width x $height box
+     *   while preserving the source aspect ratio.
+     *
+     * An explicit zero (as opposed to null) is kept as-is so that callers can
+     * detect and reject invalid target dimensions downstream.
+     *
+     * @param int  $srcwidth  Source width in pixels.
+     * @param int  $srcheight Source height in pixels.
+     * @param ?int $width     Target width in pixels (null = unspecified).
+     * @param ?int $height    Target height in pixels (null = unspecified).
+     * @param bool $fit       Scale to fit within the box when both sides are given.
+     *
+     * @return array{0: int, 1: int}
+     */
+    private function scaleToAspect(int $srcwidth, int $srcheight, ?int $width, ?int $height, bool $fit = false): array
+    {
+        if ($width === null && $height === null) {
+            return [\max(0, $srcwidth), \max(0, $srcheight)];
+        }
+
+        if ($fit && $width !== null && $width > 0 && $height !== null && $height > 0) {
+            return $this->fitToBox($srcwidth, $srcheight, $width, $height);
+        }
 
         if ($width !== null && $height === null && $srcwidth > 0) {
-            $height = (int) \round(((float) $width * (float) $srcheight) / (float) $srcwidth);
+            $height = $this->scaleSide($width, $srcheight, $srcwidth);
         }
 
         if ($height !== null && $width === null && $srcheight > 0) {
-            $width = (int) \round(((float) $height * (float) $srcwidth) / (float) $srcheight);
+            $width = $this->scaleSide($height, $srcwidth, $srcheight);
         }
 
-        if ($width === null) {
-            $width = $data['width'];
+        return [\max(0, $width ?? $srcwidth), \max(0, $height ?? $srcheight)];
+    }
+
+    /**
+     * Scale a single dimension proportionally: round($value * $numerator / $denominator).
+     *
+     * @param int $value       The known side to scale from (e.g. the specified width or height).
+     * @param int $numerator   Source size of the side being computed.
+     * @param int $denominator Source size of the side $value corresponds to.
+     *
+     * @return int Scaled size of the computed side, in pixels.
+     */
+    private function scaleSide(int $value, int $numerator, int $denominator): int
+    {
+        return (int) \round(((float) $value * (float) $numerator) / (float) $denominator);
+    }
+
+    /**
+     * Scale the source size to fit within the $width x $height box, preserving the aspect ratio.
+     *
+     * @param int $srcwidth  Source width in pixels.
+     * @param int $srcheight Source height in pixels.
+     * @param int $width     Bounding box width in pixels.
+     * @param int $height    Bounding box height in pixels.
+     *
+     * @return array{0: int, 1: int}
+     */
+    private function fitToBox(int $srcwidth, int $srcheight, int $width, int $height): array
+    {
+        if ($srcwidth <= 0 || $srcheight <= 0) {
+            return [\max(0, $width), \max(0, $height)];
         }
 
-        if ($height === null) {
-            $height = $data['height'];
-        }
-
+        $scale = \min((float) $width / (float) $srcwidth, (float) $height / (float) $srcheight);
         return [
-            \max(0, (int) $width),
-            \max(0, (int) $height),
+            \max(0, (int) \round((float) $srcwidth * $scale)),
+            \max(0, (int) \round((float) $srcheight * $scale)),
         ];
     }
 

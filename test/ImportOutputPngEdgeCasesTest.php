@@ -276,4 +276,53 @@ class ImportOutputPngEdgeCasesTest extends TestUtil
             \restore_error_handler();
         }
     }
+
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     */
+    public function testGetResizedRawDataPreservesIndexedTransparency(): void
+    {
+        $import = $this->getImportHarness();
+
+        $raw = \file_get_contents(__DIR__ . '/images/200x100_INDEXALPHA.png');
+        $this->assertIsString($raw);
+
+        $data = $this->getBaseData();
+        $data['raw'] = $raw;
+        $data['width'] = 200;
+        $data['height'] = 100;
+
+        // alpha=false exercises the indexed-palette transparency branch.
+        \set_error_handler(static fn(): bool => true);
+        try {
+            $resized = $import->callGetResizedRawData($data, 100, 50, false, 90);
+        } finally {
+            \restore_error_handler();
+        }
+
+        $this->assertSame(100, $resized['width']);
+        $this->assertSame(50, $resized['height']);
+        $this->assertTrue($resized['recoded']);
+    }
+
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
+    public function testGetImageDimensionsByKeyFitWithZeroSourceReturnsBox(): void
+    {
+        $import = $this->getImportHarness();
+
+        $data = $this->getRawData('zero-source');
+        $data['width'] = 0;
+        $data['height'] = 0;
+        $import->setCacheEntry('zero-source', $data);
+
+        // A zero-sized source falls back to the requested bounding box as-is.
+        $this->assertSame(
+            ['width' => 80, 'height' => 80],
+            $import->getImageDimensionsByKey('zero-source', 80, 80, true),
+        );
+    }
 }
