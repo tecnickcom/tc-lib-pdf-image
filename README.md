@@ -94,6 +94,80 @@ For full file-loading options, see the `tc-lib-file` documentation:
 
 ---
 
+## Persistent image cache
+
+Processing an image (decode, resize, re-encode, alpha-mask extraction) is the
+expensive part of importing. By default the result is cached **in memory for the
+lifetime of the `Import` instance**, so reusing the same image within one
+document is cheap.
+
+To reuse processed images **across documents and processes** (e.g. brand assets
+reused on thousands of PDFs), inject an optional external cache. The library
+ships only the contract — `\Com\Tecnick\Pdf\Image\ImageCacheInterface` — and you
+provide the backend (filesystem, APCu, Redis, a PSR-16 cache, ...):
+
+```php
+interface ImageCacheInterface
+{
+	/** @return array|null Stored image data, or null on a miss. */
+	public function get(string $key): ?array;
+
+	public function set(string $key, array $data): void;
+}
+```
+
+Pass an implementation to the constructor (default `null` keeps the current
+in-memory-only behaviour):
+
+```php
+$img = new \Com\Tecnick\Pdf\Image\Import(
+	kunit: 1.0,
+	encrypt: $encrypt,
+	fileHelper: $fileHelper,
+	imageCache: $myCache, // any ImageCacheInterface implementation
+);
+```
+
+On a miss the processed data is written through to the cache; on a later run a
+hit short-circuits all processing. For local files the persistent key folds in
+the file modification time and size, so editing an image in place invalidates
+its stale entry automatically.
+
+> **Security:** the cache store is a trust boundary. Stored bytes (image data,
+> palette, ICC profile) are embedded verbatim into generated PDFs, so use a
+> store only your application can write to. If your implementation serializes
+> entries, deserialize with object restoration disabled, e.g.
+> `unserialize($s, ['allowed_classes' => false])`.
+
+A minimal example implementation:
+
+```php
+use Com\Tecnick\Pdf\Image\ImageCacheInterface;
+
+final class FilesystemImageCache implements ImageCacheInterface
+{
+	public function __construct(private readonly string $dir) {}
+
+	public function get(string $key): ?array
+	{
+		$file = $this->dir . '/' . hash('sha256', $key) . '.cache';
+		if (!is_file($file)) {
+			return null;
+		}
+		$data = unserialize((string) file_get_contents($file), ['allowed_classes' => false]);
+		return is_array($data) ? $data : null;
+	}
+
+	public function set(string $key, array $data): void
+	{
+		$file = $this->dir . '/' . hash('sha256', $key) . '.cache';
+		file_put_contents($file, serialize($data), LOCK_EX);
+	}
+}
+```
+
+---
+
 ## Development
 
 ```bash

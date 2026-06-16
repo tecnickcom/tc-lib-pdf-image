@@ -105,6 +105,13 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
     protected int $iid = 0;
 
     /**
+     * Namespace + schema version prefix for external cache keys.
+     * Bump the version when the ImageRawData shape changes so that stale
+     * persisted entries are ignored instead of being fed into output.
+     */
+    private const CACHE_PREFIX = 'tc-lib-pdf-image:v1:';
+
+    /**
      * Native image types and associated importing class.
      * (Image types for which we have an import method).
      *
@@ -282,8 +289,22 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
         $quality = \max(0, \min(100, $quality));
         $imgkey = $this->getKey($image, (int) $width, (int) $height, $quality);
 
+        // Tier 1: in-process memory cache (fast path, also dedups within a document).
         if (isset($this->cache[$imgkey])) {
             return $this->cache[$imgkey];
+        }
+
+        // Tier 2: optional external cache (survives across instances and processes).
+        $cache = $this->imageCache;
+        $extkey = '';
+        if ($cache !== null) {
+            $extkey = $this->getExternalCacheKey($image, (int) $width, (int) $height, $quality);
+            $cached = $cache->get($extkey);
+            if ($cached !== null) {
+                $cached['key'] = $imgkey;
+                $this->cache[$imgkey] = $cached;
+                return $cached;
+            }
         }
 
         $data = $this->getRawData($image);
@@ -299,8 +320,72 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
 
         $data = $this->enrichMaskData($data, $width, $height, $quality, $ismask);
 
-        // store data in cache
+        // store data in the in-process cache
         $this->cache[$imgkey] = $data;
+
+        // write-through to the external cache (best-effort, persistable snapshot)
+        if ($cache !== null) {
+            $cache->set($extkey, $this->getPersistableData($data));
+        }
+
+        return $data;
+    }
+
+    /**
+     * Build the persistent (external) cache key for an image.
+     *
+     * For local file inputs the file modification time and size are folded into
+     * the key, so that editing a file in place invalidates stale persisted
+     * entries. Inline data ('@...') and remote URLs are identified by their
+     * string, which already carries their content/identity.
+     *
+     * @param string $image   Image file name, URL or '@'-prefixed data string.
+     * @param int    $width   Width in pixels.
+     * @param int    $height  Height in pixels.
+     * @param int    $quality Quality for JPEG files.
+     */
+    private function getExternalCacheKey(string $image, int $width, int $height, int $quality): string
+    {
+        $identity = $image;
+
+        if ($image !== '' && $image[0] !== '@') {
+            $path = $image[0] === '*' ? \substr($image, 1) : $image;
+            if (\is_file($path)) {
+                $mtime = \filemtime($path);
+                $size = \filesize($path);
+                if ($mtime !== false && $size !== false) {
+                    $identity = $image . ':' . $mtime . ':' . $size;
+                }
+            }
+        }
+
+        return self::CACHE_PREFIX . $this->getKey($identity, $width, $height, $quality);
+    }
+
+    /**
+     * Produce a persistable snapshot of the imported image data.
+     *
+     * Drops the original raw bytes (not used at output time) to shrink the
+     * stored payload. PDF object numbers and the output flag are intentionally
+     * left as imported (all zero / unset), so a loaded entry is ready for a
+     * fresh document without any reset.
+     *
+     * @param ImageRawData $data Imported image data.
+     *
+     * @return ImageRawData Persistable image data.
+     */
+    private function getPersistableData(array $data): array
+    {
+        $data['raw'] = '';
+
+        if (isset($data['mask'])) {
+            $data['mask']['raw'] = '';
+        }
+
+        if (isset($data['plain'])) {
+            $data['plain']['raw'] = '';
+        }
+
         return $data;
     }
 

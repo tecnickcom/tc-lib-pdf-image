@@ -85,11 +85,13 @@ abstract class Output
     /**
      * Initialize images data.
      *
-     * @param float   $kunit      Unit of measure conversion ratio.
-     * @param Encrypt $encrypt    Encrypt object.
-     * @param ObjFile $fileHelper File helper for image loading and writing.
-     * @param bool    $pdfa       True if we are in PDF/A mode.
-     * @param bool    $compress   Set to false to disable stream compression.
+     * @param float                  $kunit      Unit of measure conversion ratio.
+     * @param Encrypt                 $encrypt    Encrypt object.
+     * @param ObjFile                 $fileHelper File helper for image loading and writing.
+     * @param bool                    $pdfa       True if we are in PDF/A mode.
+     * @param bool                    $compress   Set to false to disable stream compression.
+     * @param ?ImageCacheInterface    $imageCache Optional external cache to persist processed image
+     *                                            data across instances and processes (null = disabled).
      */
     public function __construct(
         protected float $kunit,
@@ -97,6 +99,7 @@ abstract class Output
         protected ObjFile $fileHelper,
         protected bool $pdfa = false,
         protected bool $compress = true,
+        protected ?ImageCacheInterface $imageCache = null,
     ) {
         $this->fileHelper = $fileHelper;
     }
