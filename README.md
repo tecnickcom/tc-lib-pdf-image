@@ -150,7 +150,7 @@ final class FilesystemImageCache implements ImageCacheInterface
 
 	public function get(string $key): ?array
 	{
-		$file = $this->dir . '/' . hash('sha256', $key) . '.cache';
+		$file = $this->dir . '/' . hash('xxh128', $key) . '.cache';
 		if (!is_file($file)) {
 			return null;
 		}
@@ -160,7 +160,7 @@ final class FilesystemImageCache implements ImageCacheInterface
 
 	public function set(string $key, array $data): void
 	{
-		$file = $this->dir . '/' . hash('sha256', $key) . '.cache';
+		$file = $this->dir . '/' . hash('xxh128', $key) . '.cache';
 		file_put_contents($file, serialize($data), LOCK_EX);
 	}
 }

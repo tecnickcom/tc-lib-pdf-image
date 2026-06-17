@@ -298,7 +298,7 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
         $cache = $this->imageCache;
         $extkey = '';
         if ($cache !== null) {
-            $extkey = $this->getExternalCacheKey($image, (int) $width, (int) $height, $quality);
+            $extkey = $this->getExternalCacheKey($image, $imgkey, (int) $width, (int) $height, $quality);
             $cached = $cache->get($extkey);
             if ($cached !== null) {
                 $cached['key'] = $imgkey;
@@ -340,11 +340,12 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
      * string, which already carries their content/identity.
      *
      * @param string $image   Image file name, URL or '@'-prefixed data string.
+     * @param string $imgkey  Image key already computed from the raw image string.
      * @param int    $width   Width in pixels.
      * @param int    $height  Height in pixels.
      * @param int    $quality Quality for JPEG files.
      */
-    private function getExternalCacheKey(string $image, int $width, int $height, int $quality): string
+    private function getExternalCacheKey(string $image, string $imgkey, int $width, int $height, int $quality): string
     {
         $identity = $image;
 
@@ -359,7 +360,12 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
             }
         }
 
-        return self::CACHE_PREFIX . $this->getKey($identity, $width, $height, $quality);
+        // When the identity is just the raw image string the key is identical
+        // to the one already computed by the caller, so reuse it and avoid a
+        // second md5/base64 round.
+        $key = $identity === $image ? $imgkey : $this->getKey($identity, $width, $height, $quality);
+
+        return self::CACHE_PREFIX . $key;
     }
 
     /**
@@ -858,6 +864,17 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
             \imagecolorallocate($newimg, $col, $col, $col);
         }
 
+        // Precompute the gamma-corrected output for each of the 128 possible
+        // GD alpha values (7-bit: 0 -> 127), so the expensive pow() runs 128
+        // times instead of once per pixel.
+        $alphamap = [];
+        for ($alf = 0; $alf < 128; ++$alf) {
+            // GD alpha is only 7 bit (0 -> 127); 2.2 is the gamma value
+            $alphamap[$alf] = (int) ((((float) (127 - $alf) / 127) ** 2.2) * 255);
+        }
+
+        $truecolor = \imageistruecolor($img);
+
         // extract alpha channel
         for ($xpx = 0; $xpx < $data['width']; ++$xpx) {
             for ($ypx = 0; $ypx < $data['height']; ++$ypx) {
@@ -866,11 +883,18 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
                     throw new ImageException('Unable to extract alpha channel color index');
                 }
 
-                // get and correct gamma color
-                /** @var array{'red': int, 'green': int, 'blue': int, 'alpha': int} $color */
-                $color = \imagecolorsforindex($img, $colindex);
-                // GD alpha is only 7 bit (0 -> 127); 2.2 is the gamma value
-                $alpha = (int) ((((float) (127 - $color['alpha']) / 127) ** 2.2) * 255);
+                // get and correct gamma color (keys 0-127 are always present)
+                if ($truecolor) {
+                    // For truecolor images the alpha is packed in bits 24-30 of
+                    // the pixel value, so it can be read directly instead of
+                    // allocating a colour-component array per pixel.
+                    $alpha = $alphamap[($colindex >> 24) & 0x7F] ?? 0;
+                } else {
+                    /** @var array{'red': int, 'green': int, 'blue': int, 'alpha': int} $color */
+                    $color = \imagecolorsforindex($img, $colindex);
+                    $alpha = $alphamap[$color['alpha']] ?? 0;
+                }
+
                 \imagesetpixel($newimg, $xpx, $ypx, $alpha);
             }
         }

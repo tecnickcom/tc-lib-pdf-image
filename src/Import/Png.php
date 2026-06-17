@@ -63,7 +63,7 @@ class Png implements ImageImportInterface
         $offset += 8;
         $offset += 4;
 
-        $data = $this->getIhdrChunk($data, $offset);
+        $data = $this->getIhdrChunk($byte, $data, $offset);
 
         $offset += 3;
 
@@ -103,7 +103,7 @@ class Png implements ImageImportInterface
             . ' >>';
 
         $offset += 4;
-        return $this->getChunks($data, $offset);
+        return $this->getChunks($byte, $data, $offset);
     }
 
     /**
@@ -112,6 +112,7 @@ class Png implements ImageImportInterface
      * The header chunk (IHDR) contains basic information about the image data and must appear as the first chunk,
      * and there must only be one header chunk in a PNG data stream.
      *
+     * @param Byte  $byte   Byte class object wrapping the raw image data.
      * @param ImageBaseData $data   Image raw data.
      * @param int   $offset Current byte offset.
      *
@@ -120,9 +121,8 @@ class Png implements ImageImportInterface
      * @throws \Com\Tecnick\Pdf\Image\Exception If the image is invalid.
      * @throws \RangeException If the byte offset is out of range.
      */
-    protected function getIhdrChunk(array $data, int &$offset): array
+    protected function getIhdrChunk(Byte $byte, array $data, int &$offset): array
     {
-        $byte = new Byte($data['raw']);
         if (\substr($data['raw'], $offset, 4) !== 'IHDR') {
             // @codeCoverageIgnoreStart
             throw new ImageException('Invalid PNG image');
@@ -162,6 +162,7 @@ class Png implements ImageImportInterface
     /**
      * Extract chunks data from a PNG image.
      *
+     * @param Byte  $byte   Byte class object wrapping the raw image data.
      * @param ImageBaseData $data   Image raw data.
      * @param int   $offset Current byte offset.
      *
@@ -170,9 +171,8 @@ class Png implements ImageImportInterface
      * @throws \Com\Tecnick\Pdf\Image\Exception If the image is invalid.
      * @throws \RangeException If the byte offset is out of range.
      */
-    protected function getChunks(array $data, int $offset): array
+    protected function getChunks(Byte $byte, array $data, int $offset): array
     {
-        $byte = new Byte($data['raw']);
         while (($len = $byte->getULong($offset)) >= 0) {
             $offset += 4;
             $type = \substr($data['raw'], $offset, 4);
