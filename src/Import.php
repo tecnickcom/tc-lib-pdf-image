@@ -109,7 +109,7 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
      * Bump the version when the ImageRawData shape changes so that stale
      * persisted entries are ignored instead of being fed into output.
      */
-    private const CACHE_PREFIX = 'tc-lib-pdf-image:v1:';
+    private const CACHE_PREFIX = 'tc-lib-pdf-image:v2:';
 
     /**
      * Native image types and associated importing class.
@@ -203,7 +203,10 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
      */
     public function getKey(string $image, int $width = 0, int $height = 0, int $quality = 100): string
     {
-        return \strtr(\rtrim(\base64_encode(\pack('H*', \md5($image . $width . $height . $quality))), '='), '+/', '-_');
+        // The parts are joined with a delimiter so that distinct inputs cannot
+        // collapse into the same digest (e.g. ('img', 12, 3) vs ('img1', 2, 3)).
+        $seed = $image . '|' . $width . '|' . $height . '|' . $quality;
+        return \strtr(\rtrim(\base64_encode(\pack('H*', \md5($seed))), '='), '+/', '-_');
     }
 
     /**
@@ -717,11 +720,11 @@ class Import extends \Com\Tecnick\Pdf\Image\Output
      */
     protected function getMetaData(array $data): array
     {
+        // getimagesizefromstring() does not throw: it emits warnings (silenced
+        // below) and returns false on failure, which is handled right after.
+        \set_error_handler(static fn(): bool => true);
         try {
-            \set_error_handler(static fn(): bool => true);
             $meta = \getimagesizefromstring($data['raw']);
-        } catch (\Exception $exception) {
-            throw new ImageException('Invalid image format: ' . (string) $exception);
         } finally {
             \restore_error_handler();
         }

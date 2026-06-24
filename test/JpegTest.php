@@ -26,6 +26,8 @@ namespace Test;
  * @copyright 2011-2026 Nicola Asuni - Tecnick.com LTD
  * @license   https://www.gnu.org/copyleft/lesser.html GNU-LGPL v3 (see LICENSE.TXT)
  * @link      https://github.com/tecnickcom/tc-lib-pdf-image
+ *
+ * @phpstan-import-type ImageBaseData from \Com\Tecnick\Pdf\Image\Import
  */
 class JpegTest extends TestUtil
 {
@@ -381,5 +383,79 @@ class JpegTest extends TestUtil
 
         $this->assertEquals(1, $result['channels']);
         $this->assertEquals($file, $result['data']);
+    }
+
+    /**
+     * A crafted "ICC_PROFILE" marker preceded by a 2-byte length of 0 yields a
+     * negative segment length. The scanner must still move forward instead of
+     * re-finding the same marker forever (DoS regression).
+     *
+     * @throws \RangeException
+     */
+    public function testGetDataDoesNotHangOnMalformedIccMarker(): void
+    {
+        $import = new \Com\Tecnick\Pdf\Image\Import\Jpeg();
+        $raw = 'XX' . "\x00\x00" . 'ICC_PROFILE' . "\x00\x01\x01" . 'PAYLOAD';
+        $data = $this->makeJpegData($raw);
+
+        $result = $import->getData($data);
+
+        $this->assertSame('DCTDecode', $result['filter']);
+        $this->assertSame('', $result['icc']);
+        $this->assertSame($raw, $result['data']);
+    }
+
+    /**
+     * A marker at the very start of the stream has too few bytes before it to
+     * carry a length: it must be skipped without throwing or looping.
+     *
+     * @throws \RangeException
+     */
+    public function testGetDataIgnoresIccMarkerWithoutLengthPrefix(): void
+    {
+        $import = new \Com\Tecnick\Pdf\Image\Import\Jpeg();
+        $raw = 'ICC_PROFILE' . "\x00" . 'rest';
+        $data = $this->makeJpegData($raw);
+
+        $result = $import->getData($data);
+
+        $this->assertSame('', $result['icc']);
+    }
+
+    /**
+     * Build a minimal JPEG base-data array wrapping the given raw bytes.
+     *
+     * @return ImageBaseData
+     */
+    private function makeJpegData(string $raw): array
+    {
+        return [
+            'bits' => 8,
+            'channels' => 3,
+            'colspace' => 'DeviceRGB',
+            'data' => '',
+            'exturl' => false,
+            'file' => '',
+            'filter' => '',
+            'height' => 100,
+            'icc' => '',
+            'ismask' => false,
+            'key' => 'test',
+            'mapto' => IMAGETYPE_JPEG,
+            'native' => true,
+            'obj' => 0,
+            'obj_alt' => 0,
+            'obj_icc' => 0,
+            'obj_pal' => 0,
+            'pal' => '',
+            'parms' => '',
+            'raw' => $raw,
+            'recode' => false,
+            'recoded' => false,
+            'splitalpha' => false,
+            'trns' => [],
+            'type' => IMAGETYPE_JPEG,
+            'width' => 200,
+        ];
     }
 }

@@ -552,12 +552,25 @@ abstract class Output
     protected function getOutTransparency(array $data): string
     {
         $trns = '';
-        foreach ($data['trns'] as $idx => $val) {
-            if ($val !== 0) {
-                continue;
+
+        if ($data['colspace'] === 'Indexed') {
+            // Indexed: trns holds one alpha byte per palette entry; mask the
+            // fully-transparent entries (alpha 0) by their palette index.
+            foreach ($data['trns'] as $idx => $val) {
+                if ($val !== 0) {
+                    continue;
+                }
+
+                $trns .= $idx . ' ' . $idx . ' ';
             }
 
-            $trns .= $idx . ' ' . $idx . ' ';
+            return $trns;
+        }
+
+        // DeviceRGB / DeviceGray: trns holds the transparent colour sample
+        // values themselves, emitted as single-value colour-key ranges.
+        foreach ($data['trns'] as $val) {
+            $trns .= $val . ' ' . $val . ' ';
         }
 
         return $trns;

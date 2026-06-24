@@ -46,7 +46,11 @@ class ImportTest extends TestUtil
     {
         $import = $this->getTestObject();
         $result = $import->getKey('/images/200x100_RGB.png', 200, 100, 100);
-        $this->assertEquals('6EvJjr-KnDm4EnAWVt-7wQ', $result);
+        $this->assertEquals('0i9dDNrAwOZdFa6L6u1zfg', $result);
+
+        // The parts are delimited, so inputs that would concatenate to the same
+        // string ('img' + 12 + 3 vs 'img1' + 2 + 3) must not collide.
+        $this->assertNotEquals($import->getKey('img', 12, 3, 100), $import->getKey('img1', 2, 3, 100));
     }
 
     /**

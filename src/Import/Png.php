@@ -173,7 +173,11 @@ class Png implements ImageImportInterface
      */
     protected function getChunks(Byte $byte, array $data, int $offset): array
     {
-        while (($len = $byte->getULong($offset)) >= 0) {
+        // getULong() is unsigned so a "len >= 0" guard would always be true; the
+        // loop instead ends on the IEND chunk, or on the RangeException raised
+        // when a (truncated) stream is read past its end.
+        while (true) {
+            $len = $byte->getULong($offset);
             $offset += 4;
             $type = \substr($data['raw'], $offset, 4);
             $offset += 4;

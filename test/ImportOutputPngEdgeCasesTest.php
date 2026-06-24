@@ -222,14 +222,39 @@ class ImportOutputPngEdgeCasesTest extends TestUtil
         $this->assertStringContainsString('[ ]', $out);
     }
 
-    public function testGetOutTransparencySkipsNonZeroValues(): void
+    public function testGetOutTransparencyIndexedSkipsNonZeroValues(): void
     {
         $import = $this->getImportHarness();
         $data = $this->getRawData();
+        $data['colspace'] = 'Indexed';
         $data['trns'] = [0 => 0, 1 => 9, 2 => 0];
 
+        // Indexed: the fully-transparent palette indices (alpha 0) are masked.
         $out = $import->callGetOutTransparency($data);
         $this->assertSame('0 0 2 2 ', $out);
+    }
+
+    public function testGetOutTransparencyRgbUsesColorValues(): void
+    {
+        $import = $this->getImportHarness();
+        $data = $this->getRawData();
+        $data['colspace'] = 'DeviceRGB';
+        // trns holds the transparent colour sample values (R, G, B).
+        $data['trns'] = [255, 128, 0];
+
+        $out = $import->callGetOutTransparency($data);
+        $this->assertSame('255 255 128 128 0 0 ', $out);
+    }
+
+    public function testGetOutTransparencyGrayUsesColorValue(): void
+    {
+        $import = $this->getImportHarness();
+        $data = $this->getRawData();
+        $data['colspace'] = 'DeviceGray';
+        $data['trns'] = [128];
+
+        $out = $import->callGetOutTransparency($data);
+        $this->assertSame('128 128 ', $out);
     }
 
     public function testGetTrnsChunkHandlesGrayAndRgbFormats(): void

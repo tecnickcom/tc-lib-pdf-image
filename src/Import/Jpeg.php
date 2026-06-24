@@ -52,11 +52,27 @@ class Jpeg implements ImageImportInterface
         // extract embedded ICC profile (if any)
         $icc = [];
         $offset = 0;
+        // Length in bytes of the "ICC_PROFILE" marker string, used as the
+        // minimum forward step so a malformed segment can never stall the scan.
+        $markerlen = 11;
         while (($pos = \strpos($data['raw'], 'ICC_PROFILE', $offset)) !== false) {
+            if ($pos < 2) {
+                // Not enough bytes before the marker to read the APP2 length.
+                $offset = $pos + $markerlen;
+                continue;
+            }
+
             // get ICC sequence length
             $length = $byte->getUShort($pos - 2) - 16;
+            if ($length <= 0) {
+                // Malformed or spurious marker: skip past it so $offset always
+                // advances and the loop cannot get stuck re-finding this match.
+                $offset = $pos + $markerlen;
+                continue;
+            }
+
             // marker sequence number
-            $msn = \max(1, \ord($data['raw'][$pos + 12]));
+            $msn = \max(1, \ord($data['raw'][$pos + 12] ?? "\x00"));
             // number of markers (total of APP2 used)
             //$nom = \max(1, \ord($data['raw'][($pos + 13)]));
             // get sequence segment
