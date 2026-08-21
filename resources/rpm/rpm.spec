@@ -22,7 +22,7 @@ Requires:  php-composer(%{c_vendor}/tc-lib-file) >= 3.7.4
 Requires:  php-composer(%{c_vendor}/tc-lib-color) < 3.0.0
 Requires:  php-composer(%{c_vendor}/tc-lib-color) >= 2.13.4
 Requires:  php-composer(%{c_vendor}/tc-lib-pdf-encrypt) < 3.0.0
-Requires:  php-composer(%{c_vendor}/tc-lib-pdf-encrypt) >= 2.9.4
+Requires:  php-composer(%{c_vendor}/tc-lib-pdf-encrypt) >= 2.10.0
 
 Provides:  php-composer(%{c_vendor}/%{gh_project}) = %{version}
 Provides:  php-%{gh_project} = %{version}
