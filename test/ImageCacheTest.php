@@ -20,7 +20,7 @@ use Com\Tecnick\Pdf\Image\ImageCacheInterface;
 use Com\Tecnick\Pdf\Image\Import;
 
 /**
- * External image cache test.
+ * External image cache test
  *
  * @since     2026-06-16
  * @category  Library
@@ -32,6 +32,9 @@ use Com\Tecnick\Pdf\Image\Import;
  */
 class ImageCacheTest extends TestUtil
 {
+    /**
+     * @throws \Com\Tecnick\File\Exception
+     */
     private function getImport(?ImageCacheInterface $cache): Import
     {
         return new Import(0.75, $this->getTestEncrypt(), $this->getTestFileHelper(), imageCache: $cache);
@@ -54,7 +57,7 @@ class ImageCacheTest extends TestUtil
         $this->assertSame(1, $spy->getCount);
         $this->assertCount(1, $spy->setKeys);
 
-        // doctor the stored entry with a sentinel: a hit must be returned verbatim
+        // a sentinel in the stored entry: a hit is returned verbatim
         $key = $spy->setKeys[0] ?? '';
         $this->assertArrayHasKey($key, $spy->store);
         if (isset($spy->store[$key])) {
@@ -66,7 +69,7 @@ class ImageCacheTest extends TestUtil
         $img2->add($src);
         $data = $img2->getImageDataByKey($img2->getKey($src));
 
-        // proves the external entry was used as-is (no recomputation)
+        // the external entry was used as-is, without recomputation
         $this->assertSame(4321, $data['width']);
         // no additional write-through happened on a hit
         $this->assertCount(1, $spy->setKeys);
@@ -172,7 +175,7 @@ class ImageCacheTest extends TestUtil
         $cached->add($src);
         $cachedOut = $cached->getOutImagesBlock(10);
 
-        // stripping raw never affects the emitted PDF objects
+        // stripping raw does not affect the emitted PDF objects
         $this->assertSame($refOut, $cachedOut);
     }
 

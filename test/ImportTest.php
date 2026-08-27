@@ -19,7 +19,7 @@ namespace Test;
 use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
- * Unit Test
+ * Import class test
  *
  * @since     2011-05-23
  * @category  Library
@@ -31,6 +31,9 @@ use PHPUnit\Framework\Attributes\DataProvider;
  */
 class ImportTest extends TestUtil
 {
+    /**
+     * @throws \Com\Tecnick\File\Exception
+     */
     protected function getTestObject(): \Com\Tecnick\Pdf\Image\Import
     {
         $encrypt = $this->getTestEncrypt();
@@ -46,11 +49,14 @@ class ImportTest extends TestUtil
     {
         $import = $this->getTestObject();
         $result = $import->getKey('/images/200x100_RGB.png', 200, 100, 100);
-        $this->assertEquals('0i9dDNrAwOZdFa6L6u1zfg', $result);
+        $this->assertEquals('UA4kwwDY8IF4T1FggcjRSw', $result);
 
-        // The parts are delimited, so inputs that would concatenate to the same
-        // string ('img' + 12 + 3 vs 'img1' + 2 + 3) must not collide.
+        // the parts are delimited: inputs concatenating to the same string do
+        // not collide
         $this->assertNotEquals($import->getKey('img', 12, 3, 100), $import->getKey('img1', 2, 3, 100));
+
+        // the mask flag is part of the key
+        $this->assertNotEquals($import->getKey('img', 12, 3, 100), $import->getKey('img', 12, 3, 100, true));
     }
 
     /**
@@ -292,13 +298,6 @@ class ImportTest extends TestUtil
         $iid = $import->add('@' . $data['raw']);
         $this->assertEquals('q 150.000000 0 0 75.000000 2.250000 371.250000 cm /IMG18 Do Q'
         . "\n", $import->getSetImage($iid, 3, 5, 200, 100, 600));
-
-        // disabled because of libpngerror
-        // $iid = $testObj->add('*http://localhost:8000/200x100_INDEX16.png');
-        // $this->assertEquals(
-        //     'q 150.000000 0 0 75.000000 2.250000 371.250000 cm /IMG18 Do Q' . "\n",
-        //     $testObj->getSetImage($iid, 3, 5, 200, 100, 600)
-        // );
 
         $out = $import->getOutImagesBlock(10);
         $this->assertNotEmpty($out);

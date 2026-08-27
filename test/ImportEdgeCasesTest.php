@@ -29,6 +29,9 @@ namespace Test;
  */
 class ImportEdgeCasesTest extends TestUtil
 {
+    /**
+     * @throws \Com\Tecnick\File\Exception
+     */
     protected function getTestObject(): \Com\Tecnick\Pdf\Image\Import
     {
         $encrypt = $this->getTestEncrypt();
@@ -123,7 +126,7 @@ class ImportEdgeCasesTest extends TestUtil
     public function testAddWithQualityExceeding100(): void
     {
         $import = $this->getTestObject();
-        // Quality > 100 should be clamped to 100
+        // the quality is clamped to 100
         $iid = $import->add(__DIR__ . '/images/200x100_RGB.jpg', null, null, false, 150);
         $this->assertGreaterThan(0, $iid);
     }
@@ -136,7 +139,7 @@ class ImportEdgeCasesTest extends TestUtil
     public function testAddWithNegativeQuality(): void
     {
         $import = $this->getTestObject();
-        // Negative quality should be clamped to 0
+        // the quality is clamped to 0
         $iid = $import->add(__DIR__ . '/images/200x100_RGB.jpg', null, null, false, -50);
         $this->assertGreaterThan(0, $iid);
     }
@@ -149,7 +152,6 @@ class ImportEdgeCasesTest extends TestUtil
     public function testAddWithMaskAndAlphaParameters(): void
     {
         $import = $this->getTestObject();
-        // Add image as mask
         $iid = $import->add(__DIR__ . '/images/200x100_RGB.png', null, null, true);
         $this->assertGreaterThan(0, $iid);
     }
@@ -162,7 +164,6 @@ class ImportEdgeCasesTest extends TestUtil
     public function testAddWithDefprintParameter(): void
     {
         $import = $this->getTestObject();
-        // Add with defprint=true
         $iid = $import->add(__DIR__ . '/images/200x100_RGB.png', null, null, false, 100, true);
         $this->assertGreaterThan(0, $iid);
     }
@@ -177,7 +178,6 @@ class ImportEdgeCasesTest extends TestUtil
         $import = $this->getTestObject();
         $iid1 = $import->add(__DIR__ . '/images/200x100_RGB.png');
         $iid2 = $import->add(__DIR__ . '/images/200x100_GRAY.jpg');
-        // Add with alternate images
         $iid3 = $import->add(__DIR__ . '/images/200x100_RGBALPHA.png', null, null, false, 100, false, [$iid1, $iid2]);
         $this->assertGreaterThan(0, $iid3);
     }
@@ -193,7 +193,6 @@ class ImportEdgeCasesTest extends TestUtil
         $fileData = \file_get_contents(__DIR__ . '/images/200x100_RGB.png');
         $this->assertIsString($fileData);
 
-        // Add image from raw data
         $iid = $import->add('@' . $fileData);
         $this->assertGreaterThan(0, $iid);
     }
@@ -206,7 +205,6 @@ class ImportEdgeCasesTest extends TestUtil
     public function testGetKeyConsistency(): void
     {
         $import = $this->getTestObject();
-        // Same image parameters should produce same key
         $key1 = $import->getKey('/path/image.png', 100, 200, 75);
         $key2 = $import->getKey('/path/image.png', 100, 200, 75);
         $this->assertEquals($key1, $key2);
@@ -220,7 +218,6 @@ class ImportEdgeCasesTest extends TestUtil
     public function testGetKeyDifference(): void
     {
         $import = $this->getTestObject();
-        // Different parameters should produce different keys
         $key1 = $import->getKey('/path/image.png', 100, 200, 75);
         $key2 = $import->getKey('/path/image.png', 100, 200, 80);
         $this->assertNotEquals($key1, $key2);
@@ -251,11 +248,10 @@ class ImportEdgeCasesTest extends TestUtil
     public function testRepeatedImageAddition(): void
     {
         $import = $this->getTestObject();
-        // Adding the same image twice with same params should reuse cache
+        // the two images share the cached data and get distinct image IDs
         $iid1 = $import->add(__DIR__ . '/images/200x100_RGB.png', 100, 50);
         $iid2 = $import->add(__DIR__ . '/images/200x100_RGB.png', 100, 50);
 
-        // Should have different image IDs but share same cached data
         $this->assertEquals(1, $iid1);
         $this->assertEquals(2, $iid2);
     }
@@ -268,7 +264,6 @@ class ImportEdgeCasesTest extends TestUtil
     public function testAddWithResizeDownscale(): void
     {
         $import = $this->getTestObject();
-        // Downscale image
         $iid = $import->add(__DIR__ . '/images/200x100_RGB.png', 100, 50);
         $this->assertGreaterThan(0, $iid);
     }
@@ -281,7 +276,6 @@ class ImportEdgeCasesTest extends TestUtil
     public function testAddWithResizeUpscale(): void
     {
         $import = $this->getTestObject();
-        // Upscale image
         $iid = $import->add(__DIR__ . '/images/200x100_RGB.png', 400, 200);
         $this->assertGreaterThan(0, $iid);
     }

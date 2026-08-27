@@ -2,9 +2,33 @@
 
 declare(strict_types=1);
 
+/**
+ * ImportProtectedMethodsHarness.php
+ *
+ * @since     2026-05-21
+ * @category  Library
+ * @package   PdfImage
+ * @author    Nicola Asuni <info@tecnick.com>
+ * @copyright 2011-2026 Nicola Asuni - Tecnick.com LTD
+ * @license   https://www.gnu.org/copyleft/lesser.html GNU-LGPL v3 (see LICENSE)
+ * @link      https://github.com/tecnickcom/tc-lib-pdf-image
+ *
+ * This file is part of tc-lib-pdf-image software library.
+ */
+
 namespace Test;
 
 /**
+ * Import subclass exposing the protected methods and properties to the tests
+ *
+ * @since     2026-05-21
+ * @category  Library
+ * @package   PdfImage
+ * @author    Nicola Asuni <info@tecnick.com>
+ * @copyright 2011-2026 Nicola Asuni - Tecnick.com LTD
+ * @license   https://www.gnu.org/copyleft/lesser.html GNU-LGPL v3 (see LICENSE)
+ * @link      https://github.com/tecnickcom/tc-lib-pdf-image
+ *
  * @phpstan-import-type ImageBaseData from \Com\Tecnick\Pdf\Image\Import
  * @phpstan-import-type ImageRawData from \Com\Tecnick\Pdf\Image\Import
  * @phpstan-type ImageRef array{'iid': int, 'key': string, 'width': int, 'height': int, 'defprint': bool, 'altimgs'?: array<int, int>}

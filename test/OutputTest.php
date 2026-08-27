@@ -37,6 +37,9 @@ class OutputTest extends TestUtil
         throw new \RuntimeException('withFileHelper callback error');
     }
 
+    /**
+     * @throws \Com\Tecnick\File\Exception
+     */
     protected function getTestObject(): \Com\Tecnick\Pdf\Image\Import
     {
         $encrypt = $this->getTestEncrypt();
@@ -51,7 +54,6 @@ class OutputTest extends TestUtil
     public function testGetObjectNumber(): void
     {
         $import = $this->getTestObject();
-        // Add some images and check object number increases after calling getOutImagesBlock
         $import->add(__DIR__ . '/images/200x100_RGB.png');
         $import->getOutImagesBlock(10);
         $this->assertGreaterThan(10, $import->getObjectNumber());
@@ -140,7 +142,6 @@ class OutputTest extends TestUtil
         $import->add(__DIR__ . '/images/200x100_RGB.png');
         $import->getOutImagesBlock(10);
 
-        // Test with non-existent image IDs
         $result = $import->getXobjectDictByKeys([999]);
         $this->assertEquals('', $result);
     }
@@ -248,7 +249,6 @@ class OutputTest extends TestUtil
         $import = $this->getTestObject();
         $iid = $import->add(__DIR__ . '/images/200x100_RGB.png');
 
-        // Test with different coordinates and page height
         $result = $import->getSetImage($iid, 10, 20, 100, 50, 800);
         $this->assertStringContainsString('q 75.000000 0 0 37.500000', $result);
         $this->assertStringContainsString('/IMG' . $iid . ' Do Q', $result);
@@ -296,12 +296,12 @@ class OutputTest extends TestUtil
         $import = $this->getTestObject();
         $iid = $import->add(__DIR__ . '/images/200x100_RGB.png');
 
-        // Test with zero coordinates
+        // zero coordinates
         $result = $import->getSetImage($iid, 0, 0, 100, 100, 600);
         $this->assertStringContainsString('0.000000', $result);
         $this->assertStringContainsString('cm /IMG', $result);
 
-        // Test with large coordinates
+        // large coordinates
         $result2 = $import->getSetImage($iid, 100, 200, 300, 400, 1000);
         $this->assertStringContainsString('300.000000', $result2);
         $this->assertStringContainsString('cm /IMG', $result2);

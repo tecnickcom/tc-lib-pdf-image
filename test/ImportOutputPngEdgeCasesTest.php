@@ -22,7 +22,15 @@ require_once __DIR__ . '/ImportProtectedMethodsHarness.php';
 require_once __DIR__ . '/PngChunkParsingHarness.php';
 
 /**
- * Extra branch-focused tests for import, output and PNG chunk parsing.
+ * Import, output and PNG chunk parsing edge cases test
+ *
+ * @since     2026-05-21
+ * @category  Library
+ * @package   PdfImage
+ * @author    Nicola Asuni <info@tecnick.com>
+ * @copyright 2011-2026 Nicola Asuni - Tecnick.com LTD
+ * @license   https://www.gnu.org/copyleft/lesser.html GNU-LGPL v3 (see LICENSE)
+ * @link      https://github.com/tecnickcom/tc-lib-pdf-image
  *
  * @phpstan-import-type ImageBaseData from \Com\Tecnick\Pdf\Image\Import
  * @phpstan-import-type ImageRawData from \Com\Tecnick\Pdf\Image\Import
@@ -72,6 +80,9 @@ class ImportOutputPngEdgeCasesTest extends TestUtil
         return $this->getBaseData($key);
     }
 
+    /**
+     * @throws \Com\Tecnick\File\Exception
+     */
     protected function getImportHarness(bool $pdfa = false): ImportProtectedMethodsHarness
     {
         return new ImportProtectedMethodsHarness(
@@ -85,6 +96,7 @@ class ImportOutputPngEdgeCasesTest extends TestUtil
 
     /**
      * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
      */
     public function testGetDataThrowsWhenImageIsNotNative(): void
     {
@@ -98,6 +110,7 @@ class ImportOutputPngEdgeCasesTest extends TestUtil
 
     /**
      * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
      */
     public function testGetDataThrowsWhenNativeTypeIsUnknown(): void
     {
@@ -111,6 +124,7 @@ class ImportOutputPngEdgeCasesTest extends TestUtil
 
     /**
      * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
      */
     public function testGetResizedRawDataRejectsInvalidRawImage(): void
     {
@@ -130,6 +144,7 @@ class ImportOutputPngEdgeCasesTest extends TestUtil
 
     /**
      * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
      */
     public function testGetAlphaChannelRawDataRejectsInvalidRawImage(): void
     {
@@ -149,6 +164,7 @@ class ImportOutputPngEdgeCasesTest extends TestUtil
 
     /**
      * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     * @throws \Com\Tecnick\File\Exception
      */
     public function testGetOutImageSupportsExternalStreamWithFilter(): void
     {
@@ -165,6 +181,7 @@ class ImportOutputPngEdgeCasesTest extends TestUtil
         ];
         $data = $this->getRawData('ext');
         $data['exturl'] = true;
+        $data['file'] = 'https://example.test/image.png';
         $data['filter'] = 'ASCIIHexDecode';
         $data['width'] = 10;
         $data['height'] = 5;
@@ -172,10 +189,44 @@ class ImportOutputPngEdgeCasesTest extends TestUtil
         $import->setCacheEntry('ext', $data);
         $out = $import->callGetOutImage($img, $data);
 
-        $this->assertStringContainsString('/Length 0 /F << /FS /URL /F (true) >>', $out);
+        // the file specification carries the source URL of the external stream
+        $this->assertStringContainsString('/Length 0 /F << /FS /URL /F (https://example.test/image.png) >>', $out);
         $this->assertStringContainsString('/FFilter /ASCIIHexDecode', $out);
+        // an image XObject is a stream object even when its data is external
+        $this->assertStringContainsString('>> stream' . "\n" . 'endstream' . "\n" . 'endobj', $out);
     }
 
+    /**
+     * An indexed image without a palette does not emit a negative hival.
+     *
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
+    public function testIndexedImageWithEmptyPaletteDoesNotEmitNegativeHival(): void
+    {
+        $import = $this->getImportHarness();
+        $import->setPon(4);
+
+        $img = [
+            'iid' => 1,
+            'key' => 'idx',
+            'width' => 1,
+            'height' => 1,
+            'defprint' => false,
+            'altimgs' => [],
+        ];
+        $data = $this->getRawData('idx');
+        $data['colspace'] = 'Indexed';
+
+        $import->setCacheEntry('idx', $data);
+        $out = $import->callGetOutImage($img, $data);
+
+        $this->assertStringContainsString('/ColorSpace [/Indexed /DeviceRGB 0 5 0 R]', $out);
+    }
+
+    /**
+     * @throws \Com\Tecnick\File\Exception
+     */
     public function testGetXobjectDictByKeysFallsBackToPlainAndMaskEntries(): void
     {
         $import = $this->getImportHarness();
@@ -188,6 +239,9 @@ class ImportOutputPngEdgeCasesTest extends TestUtil
         $this->assertSame(' /IMGplain2 42 0 R /IMGmask3 43 0 R', $out);
     }
 
+    /**
+     * @throws \Com\Tecnick\File\Exception
+     */
     public function testGetOutAltImagesSkipsUnknownOrUnbuiltAlternateImages(): void
     {
         $import = $this->getImportHarness();
@@ -218,10 +272,58 @@ class ImportOutputPngEdgeCasesTest extends TestUtil
 
         $out = $import->callGetOutAltImages($img, $data);
 
-        $this->assertStringContainsString('21 0 obj', $out);
-        $this->assertStringContainsString('[ ]', $out);
+        // no alternate resolves to a written object: nothing is emitted and no
+        // object number is consumed
+        $this->assertSame('', $out);
+        $this->assertSame(0, $data['obj_alt']);
+        $this->assertSame(20, $import->getObjectNumber());
     }
 
+    /**
+     * @throws \Com\Tecnick\File\Exception
+     */
+    public function testGetOutAltImagesUsesPlainObjectOfAlphaSplitImage(): void
+    {
+        $import = $this->getImportHarness();
+        $import->setPon(20);
+
+        $import->setImageEntry(2, [
+            'iid' => 2,
+            'key' => 'alt-split',
+            'width' => 10,
+            'height' => 5,
+            'defprint' => true,
+            'altimgs' => [],
+        ]);
+
+        // an alpha-split image has no top-level object, only sub-images
+        $altData = $this->getRawData('alt-split');
+        $altData['obj'] = 0;
+        $plain = $this->getBaseData('alt-split');
+        $plain['obj'] = 7;
+        $altData['plain'] = $plain;
+        $import->setCacheEntry('alt-split', $altData);
+
+        $img = [
+            'iid' => 1,
+            'key' => 'main',
+            'width' => 10,
+            'height' => 5,
+            'defprint' => false,
+            'altimgs' => [2],
+        ];
+        $data = $this->getRawData('main');
+
+        $out = $import->callGetOutAltImages($img, $data);
+
+        $this->assertStringContainsString('21 0 obj', $out);
+        $this->assertStringContainsString('<< /Image 7 0 R /DefaultForPrinting true >>', $out);
+        $this->assertSame(21, $data['obj_alt']);
+    }
+
+    /**
+     * @throws \Com\Tecnick\File\Exception
+     */
     public function testGetOutTransparencyIndexedSkipsNonZeroValues(): void
     {
         $import = $this->getImportHarness();
@@ -229,23 +331,29 @@ class ImportOutputPngEdgeCasesTest extends TestUtil
         $data['colspace'] = 'Indexed';
         $data['trns'] = [0 => 0, 1 => 9, 2 => 0];
 
-        // Indexed: the fully-transparent palette indices (alpha 0) are masked.
+        // indexed: the fully-transparent palette indices (alpha 0) are masked
         $out = $import->callGetOutTransparency($data);
         $this->assertSame('0 0 2 2 ', $out);
     }
 
+    /**
+     * @throws \Com\Tecnick\File\Exception
+     */
     public function testGetOutTransparencyRgbUsesColorValues(): void
     {
         $import = $this->getImportHarness();
         $data = $this->getRawData();
         $data['colspace'] = 'DeviceRGB';
-        // trns holds the transparent colour sample values (R, G, B).
+        // trns holds the transparent colour samples (R, G, B)
         $data['trns'] = [255, 128, 0];
 
         $out = $import->callGetOutTransparency($data);
         $this->assertSame('255 255 128 128 0 0 ', $out);
     }
 
+    /**
+     * @throws \Com\Tecnick\File\Exception
+     */
     public function testGetOutTransparencyGrayUsesColorValue(): void
     {
         $import = $this->getImportHarness();
@@ -281,6 +389,61 @@ class ImportOutputPngEdgeCasesTest extends TestUtil
     }
 
     /**
+     * A stream too short to hold the PNG header is reported as an invalid image.
+     *
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \RangeException
+     */
+    public function testGetDataRejectsTruncatedPngHeader(): void
+    {
+        $this->bcExpectException(\Com\Tecnick\Pdf\Image\Exception::class);
+
+        $data = $this->getBaseData();
+        $data['raw'] = \chr(137) . 'PNG' . \chr(13) . \chr(10) . \chr(26) . \chr(10) . 'IHDR';
+
+        (new \Com\Tecnick\Pdf\Image\Import\Png())->getData($data);
+    }
+
+    /**
+     * A PNG data stream cut before its IEND chunk is reported as an invalid image.
+     *
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \RangeException
+     */
+    public function testGetDataRejectsPngWithoutIendChunk(): void
+    {
+        $raw = \file_get_contents(__DIR__ . '/images/200x100_RGB.png');
+        $this->assertIsString($raw);
+
+        $this->bcExpectException(\Com\Tecnick\Pdf\Image\Exception::class);
+
+        $data = $this->getBaseData();
+        // drop the trailing IEND chunk: length (4) + type (4) + CRC (4)
+        $data['raw'] = \substr($raw, 0, -12);
+
+        (new \Com\Tecnick\Pdf\Image\Import\Png())->getData($data);
+    }
+
+    /**
+     * An iCCP chunk that carries neither a name terminator nor a compression
+     * method byte is reported as an invalid image.
+     *
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \RangeException
+     */
+    public function testGetIccpChunkRejectsTruncatedChunk(): void
+    {
+        $this->bcExpectException(\Com\Tecnick\Pdf\Image\Exception::class);
+
+        $png = new PngChunkParsingHarness();
+        $data = $this->getBaseData();
+        $data['raw'] = 'ICC';
+        $offset = 0;
+
+        $png->callGetIccpChunk(new \Com\Tecnick\File\Byte($data['raw']), $data, $offset, 8);
+    }
+
+    /**
      * @throws \Com\Tecnick\Pdf\Image\Exception
      * @throws \RangeException
      */
@@ -304,6 +467,7 @@ class ImportOutputPngEdgeCasesTest extends TestUtil
 
     /**
      * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
      */
     public function testGetResizedRawDataPreservesIndexedTransparency(): void
     {
@@ -317,7 +481,7 @@ class ImportOutputPngEdgeCasesTest extends TestUtil
         $data['width'] = 200;
         $data['height'] = 100;
 
-        // alpha=false exercises the indexed-palette transparency branch.
+        // alpha=false exercises the indexed-palette transparency branch
         \set_error_handler(static fn(): bool => true);
         try {
             $resized = $import->callGetResizedRawData($data, 100, 50, false, 90);
@@ -344,7 +508,7 @@ class ImportOutputPngEdgeCasesTest extends TestUtil
         $data['height'] = 0;
         $import->setCacheEntry('zero-source', $data);
 
-        // A zero-sized source falls back to the requested bounding box as-is.
+        // a zero-sized source falls back to the requested bounding box as-is
         $this->assertSame(
             ['width' => 80, 'height' => 80],
             $import->getImageDimensionsByKey('zero-source', 80, 80, true),

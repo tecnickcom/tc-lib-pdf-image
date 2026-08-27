@@ -14,7 +14,6 @@ updates:
       interval: monthly
     labels:
       - dependencies
-    # Only dev tooling is version-constrained here; runtime requirements are
-    # deliberately broad ranges that Dependabot should not narrow.
+    # only the development dependencies are updated
     allow:
       - dependency-type: development

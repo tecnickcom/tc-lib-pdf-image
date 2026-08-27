@@ -11,7 +11,7 @@
  * @license   https://www.gnu.org/copyleft/lesser.html GNU-LGPL v3 (see LICENSE)
  * @link      https://github.com/tecnickcom/tc-lib-pdf-image
  *
- * This file is part of tc-lib-color software library.
+ * This file is part of tc-lib-pdf-image software library.
  */
 
 namespace Test;
@@ -19,7 +19,7 @@ namespace Test;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Web Color class test
+ * Base class for the unit tests
  *
  * @since     2020-12-19
  * @category  Library
@@ -31,6 +31,9 @@ use PHPUnit\Framework\TestCase;
  */
 class TestUtil extends TestCase
 {
+    /**
+     * @throws \Com\Tecnick\File\Exception
+     */
     protected function getTestFileHelper(): \Com\Tecnick\File\File
     {
         return new \Com\Tecnick\File\File(allowedHosts: ['*'], allowedPaths: ['*']);
@@ -41,12 +44,12 @@ class TestUtil extends TestCase
         return new class extends \Com\Tecnick\Pdf\Encrypt\Encrypt {
             public function __construct() {}
 
-            public function encryptString(string $str, int $objnum = 0): string
+            public function encryptString(string $str, int $objnum = 0, int $gennum = 0): string
             {
                 return $str;
             }
 
-            public function escapeDataString(string $str, int $objnum = 0): string
+            public function escapeDataString(string $str, int $objnum = 0, int $gennum = 0): string
             {
                 return '(' . $str . ')';
             }

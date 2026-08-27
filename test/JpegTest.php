@@ -386,9 +386,9 @@ class JpegTest extends TestUtil
     }
 
     /**
-     * A crafted "ICC_PROFILE" marker preceded by a 2-byte length of 0 yields a
-     * negative segment length. The scanner must still move forward instead of
-     * re-finding the same marker forever (DoS regression).
+     * An "ICC_PROFILE" marker preceded by a 2-byte length of 0 yields a
+     * negative segment length: the scanner moves forward instead of
+     * re-finding the same marker.
      *
      * @throws \RangeException
      */
@@ -406,8 +406,8 @@ class JpegTest extends TestUtil
     }
 
     /**
-     * A marker at the very start of the stream has too few bytes before it to
-     * carry a length: it must be skipped without throwing or looping.
+     * A marker at the start of the stream has too few bytes before it to carry
+     * a length and is skipped.
      *
      * @throws \RangeException
      */

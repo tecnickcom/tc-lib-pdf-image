@@ -19,7 +19,15 @@ namespace Test;
 use Com\Tecnick\Pdf\Image\ImageCacheInterface;
 
 /**
- * In-memory ImageCacheInterface implementation that records access for tests.
+ * In-memory ImageCacheInterface implementation that records the access
+ *
+ * @since     2026-06-16
+ * @category  Library
+ * @package   PdfImage
+ * @author    Nicola Asuni <info@tecnick.com>
+ * @copyright 2011-2026 Nicola Asuni - Tecnick.com LTD
+ * @license   https://www.gnu.org/copyleft/lesser.html GNU-LGPL v3 (see LICENSE)
+ * @link      https://github.com/tecnickcom/tc-lib-pdf-image
  *
  * @phpstan-import-type ImageRawData from \Com\Tecnick\Pdf\Image\Import
  */
