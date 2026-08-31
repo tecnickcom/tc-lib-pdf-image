@@ -82,6 +82,12 @@ abstract class Output
     protected array $cache = [];
 
     /**
+     * True when the soft mask of an alpha image was dropped because of the
+     * $notransparency flag.
+     */
+    protected bool $droppedalpha = false;
+
+    /**
      * Initialize images data.
      *
      * @param float                  $kunit      Unit of measure conversion ratio.
@@ -91,6 +97,7 @@ abstract class Output
      * @param bool                    $compress   Set to false to disable stream compression.
      * @param ?ImageCacheInterface    $imageCache External cache used to persist processed image data
      *                                            across instances and processes (null = disabled).
+     * @param bool                    $notransparency True to suppress the soft mask of an alpha image.
      */
     public function __construct(
         protected float $kunit,
@@ -99,6 +106,7 @@ abstract class Output
         protected bool $pdfa = false,
         protected bool $compress = true,
         protected ?ImageCacheInterface $imageCache = null,
+        protected bool $notransparency = false,
     ) {}
 
     /**
@@ -107,6 +115,38 @@ abstract class Output
     public function getObjectNumber(): int
     {
         return $this->pon;
+    }
+
+    /**
+     * Returns true when the soft mask of an alpha image was dropped because
+     * transparency is disabled. Set by getOutImagesBlock().
+     */
+    public function hasDroppedAlpha(): bool
+    {
+        return $this->droppedalpha;
+    }
+
+    /**
+     * Returns true when any added image is emitted in the DeviceCMYK color space.
+     */
+    public function hasDeviceCmykImage(): bool
+    {
+        foreach ($this->image as $img) {
+            $data = $this->cache[$img['key']] ?? null;
+            if ($data === null) {
+                continue;
+            }
+
+            if ($data['colspace'] === 'DeviceCMYK') {
+                return true;
+            }
+
+            if (($data['plain']['colspace'] ?? '') === 'DeviceCMYK') {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -196,9 +236,17 @@ abstract class Output
 
             if (!isset($this->cache[$key]['out'])) {
                 if (isset($this->cache[$key]['mask'])) {
-                    /** @var ImageRawData $mask */
-                    $mask = &$this->cache[$key]['mask'];
-                    $out .= $this->getOutImage($img, $mask, 'mask');
+                    // the mask of an alpha-split image is written only as the soft
+                    // mask of the plain sub-image, so it is dropped along with it
+                    $dropmask = $this->notransparency && isset($this->cache[$key]['plain']);
+                    if ($dropmask) {
+                        $this->droppedalpha = true;
+                    } else {
+                        /** @var ImageRawData $mask */
+                        $mask = &$this->cache[$key]['mask'];
+                        $out .= $this->getOutImage($img, $mask, 'mask');
+                    }
+
                     if (isset($this->cache[$key]['plain'])) {
                         /** @var ImageRawData $plain */
                         $plain = &$this->cache[$key]['plain'];
@@ -216,12 +264,12 @@ abstract class Output
             $maskobj = (int) ($this->cache[$key]['mask']['obj'] ?? 0);
             $plainobj = (int) ($this->cache[$key]['plain']['obj'] ?? 0);
 
-            if ($maskobj === 0) {
-                $this->xobjdict['IMG' . $img['iid']] = $this->cache[$key]['obj'];
-            } elseif ($plainobj === 0) {
+            if ($plainobj !== 0) {
+                $this->xobjdict['IMGplain' . $img['iid']] = $plainobj;
+            } elseif ($maskobj !== 0) {
                 $this->xobjdict['IMGmask' . $img['iid']] = $maskobj;
             } else {
-                $this->xobjdict['IMGplain' . $img['iid']] = $plainobj;
+                $this->xobjdict['IMG' . $img['iid']] = $this->cache[$key]['obj'];
             }
         }
 
@@ -452,7 +500,7 @@ abstract class Output
         $out .= ' /BitsPerComponent ' . $data['bits'];
 
         $maskobj = (int) ($this->cache[$data['key']]['mask']['obj'] ?? 0);
-        if (!$data['ismask'] && $maskobj > 0) {
+        if (!$this->notransparency && !$data['ismask'] && $maskobj > 0) {
             $out .= ' /SMask ' . $maskobj . ' 0 R';
         }
 

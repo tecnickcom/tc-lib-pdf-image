@@ -183,6 +183,80 @@ class OutputTest extends TestUtil
      * @throws \Com\Tecnick\File\Exception
      * @throws \Com\Tecnick\Pdf\Encrypt\Exception
      */
+    public function testGetOutImagesBlockAlphaKeepsSoftMask(): void
+    {
+        $import = $this->getTestObject();
+        $iid = $import->add(__DIR__ . '/images/200x100_RGBALPHA.png');
+
+        $result = $import->getOutImagesBlock(1);
+        $this->assertStringContainsString('/SMask', $result);
+        $this->assertFalse($import->hasDroppedAlpha());
+        $this->assertStringContainsString('IMGplain' . $iid, $import->getXobjectDict());
+    }
+
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
+    public function testGetOutImagesBlockAlphaWithoutTransparency(): void
+    {
+        $import = new \Com\Tecnick\Pdf\Image\Import(
+            0.75,
+            $this->getTestEncrypt(),
+            $this->getTestFileHelper(),
+            notransparency: true,
+        );
+        $iid = $import->add(__DIR__ . '/images/200x100_RGBALPHA.png');
+
+        $result = $import->getOutImagesBlock(1);
+        $this->assertStringNotContainsString('/SMask', $result);
+        $this->assertTrue($import->hasDroppedAlpha());
+        $this->assertStringContainsString('IMGplain' . $iid, $import->getXobjectDict());
+    }
+
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
+    public function testGetOutImagesBlockMaskOnlyWithoutTransparency(): void
+    {
+        $import = new \Com\Tecnick\Pdf\Image\Import(
+            0.75,
+            $this->getTestEncrypt(),
+            $this->getTestFileHelper(),
+            notransparency: true,
+        );
+        $iid = $import->add(__DIR__ . '/images/200x100_RGB.png', null, null, true);
+
+        $result = $import->getOutImagesBlock(1);
+        $this->assertStringContainsString('2 0 obj', $result);
+        $this->assertStringNotContainsString('/SMask', $result);
+        $this->assertFalse($import->hasDroppedAlpha());
+        $this->assertStringContainsString('IMGmask' . $iid, $import->getXobjectDict());
+    }
+
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
+    public function testHasDeviceCmykImage(): void
+    {
+        $import = $this->getTestObject();
+        $import->add(__DIR__ . '/images/200x100_RGB.png');
+        $this->assertFalse($import->hasDeviceCmykImage());
+
+        $import->add(__DIR__ . '/images/200x100_CMYK.jpg');
+        $this->assertTrue($import->hasDeviceCmykImage());
+    }
+
+    /**
+     * @throws \Com\Tecnick\Pdf\Image\Exception
+     * @throws \Com\Tecnick\File\Exception
+     * @throws \Com\Tecnick\Pdf\Encrypt\Exception
+     */
     public function testGetOutImagesBlockObjectNumberIncrement(): void
     {
         $import = $this->getTestObject();
