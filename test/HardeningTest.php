@@ -21,6 +21,7 @@ namespace Test;
 use Com\Tecnick\Pdf\Image\Exception as ImageException;
 use Com\Tecnick\Pdf\Image\ImageCacheInterface;
 use Com\Tecnick\Pdf\Image\Import;
+use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 
 /**
  * Malformed input and PDF object structure test
@@ -164,6 +165,7 @@ class HardeningTest extends TestUtil
      * @throws \Com\Tecnick\File\Exception
      * @throws \Com\Tecnick\Pdf\Image\Exception
      */
+    #[RequiresPhpExtension('gd')]
     public function testAlphaSplitImageKeepsTheIccProfile(): void
     {
         $iccp = '';
@@ -451,6 +453,7 @@ class HardeningTest extends TestUtil
      * @throws \Com\Tecnick\Pdf\Encrypt\Exception
      * @throws \Com\Tecnick\Pdf\Image\Exception
      */
+    #[RequiresPhpExtension('gd')]
     public function testMaskImportOfAlphaImageHasImageData(): void
     {
         $import = $this->getTestObject();
@@ -490,6 +493,7 @@ class HardeningTest extends TestUtil
      * @throws \Com\Tecnick\File\Exception
      * @throws \Com\Tecnick\Pdf\Image\Exception
      */
+    #[RequiresPhpExtension('gd')]
     public function testPlainImageKeepsUnpremultipliedColors(): void
     {
         // 4 white pixels at decreasing opacity (GD alpha 0 -> 127)
@@ -523,6 +527,7 @@ class HardeningTest extends TestUtil
      * @throws \Com\Tecnick\File\Exception
      * @throws \Com\Tecnick\Pdf\Image\Exception
      */
+    #[RequiresPhpExtension('gd')]
     public function testInterlacedImageKeepsTheChannelCount(): void
     {
         $import = $this->getTestObject();
@@ -693,6 +698,7 @@ class HardeningTest extends TestUtil
      * @throws \Com\Tecnick\Pdf\Encrypt\Exception
      * @throws \Com\Tecnick\Pdf\Image\Exception
      */
+    #[RequiresPhpExtension('gd')]
     public function testIndexedPartialTransparencyBecomesASoftMask(): void
     {
         $png = $this->getIndexedPng("\xff\x00\x80\x40");
@@ -740,6 +746,7 @@ class HardeningTest extends TestUtil
      * @throws \Com\Tecnick\Pdf\Encrypt\Exception
      * @throws \Com\Tecnick\Pdf\Image\Exception
      */
+    #[RequiresPhpExtension('gd')]
     public function testReparsedImageDoesNotInheritTheDiscardedTransparency(): void
     {
         $png = $this->getIndexedPng("\xff\x00\x80\x40");

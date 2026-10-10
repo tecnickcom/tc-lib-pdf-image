@@ -18,6 +18,8 @@ declare(strict_types=1);
 
 namespace Test;
 
+use PHPUnit\Framework\Attributes\RequiresPhpExtension;
+
 require_once __DIR__ . '/ImportProtectedMethodsHarness.php';
 require_once __DIR__ . '/PngChunkParsingHarness.php';
 
@@ -469,6 +471,7 @@ class ImportOutputPngEdgeCasesTest extends TestUtil
      * @throws \Com\Tecnick\Pdf\Image\Exception
      * @throws \Com\Tecnick\File\Exception
      */
+    #[RequiresPhpExtension('gd')]
     public function testGetResizedRawDataPreservesIndexedTransparency(): void
     {
         $import = $this->getImportHarness();

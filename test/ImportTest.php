@@ -17,6 +17,7 @@
 namespace Test;
 
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 
 /**
  * Import class test
@@ -162,6 +163,7 @@ class ImportTest extends TestUtil
      * @throws \Com\Tecnick\File\Exception
      * @throws \Com\Tecnick\Pdf\Encrypt\Exception
      */
+    #[RequiresPhpExtension('gd')]
     public function testAdd(): void
     {
         $import = $this->getTestObject();

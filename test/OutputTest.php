@@ -16,6 +16,8 @@
 
 namespace Test;
 
+use PHPUnit\Framework\Attributes\RequiresPhpExtension;
+
 /**
  * Output class test
  *
@@ -183,6 +185,7 @@ class OutputTest extends TestUtil
      * @throws \Com\Tecnick\File\Exception
      * @throws \Com\Tecnick\Pdf\Encrypt\Exception
      */
+    #[RequiresPhpExtension('gd')]
     public function testGetOutImagesBlockAlphaKeepsSoftMask(): void
     {
         $import = $this->getTestObject();
@@ -199,6 +202,7 @@ class OutputTest extends TestUtil
      * @throws \Com\Tecnick\File\Exception
      * @throws \Com\Tecnick\Pdf\Encrypt\Exception
      */
+    #[RequiresPhpExtension('gd')]
     public function testGetOutImagesBlockAlphaWithoutTransparency(): void
     {
         $import = new \Com\Tecnick\Pdf\Image\Import(
@@ -257,6 +261,7 @@ class OutputTest extends TestUtil
      * @throws \Com\Tecnick\File\Exception
      * @throws \Com\Tecnick\Pdf\Encrypt\Exception
      */
+    #[RequiresPhpExtension('gd')]
     public function testGetOutImagesBlockObjectNumberIncrement(): void
     {
         $import = $this->getTestObject();
@@ -272,6 +277,7 @@ class OutputTest extends TestUtil
      * @throws \Com\Tecnick\File\Exception
      * @throws \Com\Tecnick\Pdf\Encrypt\Exception
      */
+    #[RequiresPhpExtension('gd')]
     public function testGetSetImageWithMask(): void
     {
         $import = $this->getTestObject();

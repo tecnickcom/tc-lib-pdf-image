@@ -18,6 +18,7 @@ namespace Test;
 
 use Com\Tecnick\Pdf\Image\ImageCacheInterface;
 use Com\Tecnick\Pdf\Image\Import;
+use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 
 /**
  * External image cache test
@@ -98,6 +99,7 @@ class ImageCacheTest extends TestUtil
      * @throws \Com\Tecnick\File\Exception
      * @throws \Com\Tecnick\Pdf\Encrypt\Exception
      */
+    #[RequiresPhpExtension('gd')]
     public function testPersistedSnapshotIsClean(): void
     {
         $spy = new SpyImageCache();

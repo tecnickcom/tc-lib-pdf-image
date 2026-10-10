@@ -16,6 +16,8 @@
 
 namespace Test;
 
+use PHPUnit\Framework\Attributes\RequiresPhpExtension;
+
 /**
  * Import edge cases test
  *
@@ -67,6 +69,7 @@ class ImportEdgeCasesTest extends TestUtil
      * @throws \Com\Tecnick\File\Exception
      * @throws \Com\Tecnick\Pdf\Encrypt\Exception
      */
+    #[RequiresPhpExtension('gd')]
     public function testAddWithOnlyWidthKeepsAspectRatio(): void
     {
         $import = $this->getTestObject();
@@ -83,6 +86,7 @@ class ImportEdgeCasesTest extends TestUtil
      * @throws \Com\Tecnick\File\Exception
      * @throws \Com\Tecnick\Pdf\Encrypt\Exception
      */
+    #[RequiresPhpExtension('gd')]
     public function testAddWithOnlyHeightKeepsAspectRatio(): void
     {
         $import = $this->getTestObject();
@@ -173,6 +177,7 @@ class ImportEdgeCasesTest extends TestUtil
      * @throws \Com\Tecnick\File\Exception
      * @throws \Com\Tecnick\Pdf\Encrypt\Exception
      */
+    #[RequiresPhpExtension('gd')]
     public function testAddWithAlternateImages(): void
     {
         $import = $this->getTestObject();
@@ -228,6 +233,7 @@ class ImportEdgeCasesTest extends TestUtil
      * @throws \Com\Tecnick\File\Exception
      * @throws \Com\Tecnick\Pdf\Encrypt\Exception
      */
+    #[RequiresPhpExtension('gd')]
     public function testMultipleAddOperations(): void
     {
         $import = $this->getTestObject();
@@ -245,6 +251,7 @@ class ImportEdgeCasesTest extends TestUtil
      * @throws \Com\Tecnick\File\Exception
      * @throws \Com\Tecnick\Pdf\Encrypt\Exception
      */
+    #[RequiresPhpExtension('gd')]
     public function testRepeatedImageAddition(): void
     {
         $import = $this->getTestObject();
@@ -261,6 +268,7 @@ class ImportEdgeCasesTest extends TestUtil
      * @throws \Com\Tecnick\File\Exception
      * @throws \Com\Tecnick\Pdf\Encrypt\Exception
      */
+    #[RequiresPhpExtension('gd')]
     public function testAddWithResizeDownscale(): void
     {
         $import = $this->getTestObject();
@@ -273,6 +281,7 @@ class ImportEdgeCasesTest extends TestUtil
      * @throws \Com\Tecnick\File\Exception
      * @throws \Com\Tecnick\Pdf\Encrypt\Exception
      */
+    #[RequiresPhpExtension('gd')]
     public function testAddWithResizeUpscale(): void
     {
         $import = $this->getTestObject();
@@ -285,6 +294,7 @@ class ImportEdgeCasesTest extends TestUtil
      * @throws \Com\Tecnick\File\Exception
      * @throws \Com\Tecnick\Pdf\Encrypt\Exception
      */
+    #[RequiresPhpExtension('gd')]
     public function testGetSetImageAfterMultipleAdds(): void
     {
         $import = $this->getTestObject();
