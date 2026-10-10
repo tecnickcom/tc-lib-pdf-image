@@ -15,12 +15,13 @@ URL:       https://github.com/%{gh_owner}/%{gh_project}
 BuildArch: noarch
 
 Requires:  php(language) >= 8.2.0
-Requires:  php-gd
 Requires:  php-zlib
 Requires:  php-composer(%{c_vendor}/tc-lib-file) < 4.0.0
-Requires:  php-composer(%{c_vendor}/tc-lib-file) >= 3.9.6
+Requires:  php-composer(%{c_vendor}/tc-lib-file) >= 3.9.8
 Requires:  php-composer(%{c_vendor}/tc-lib-pdf-encrypt) < 3.0.0
-Requires:  php-composer(%{c_vendor}/tc-lib-pdf-encrypt) >= 2.11.6
+Requires:  php-composer(%{c_vendor}/tc-lib-pdf-encrypt) >= 2.11.7
+
+Recommends: php-gd
 
 Provides:  php-composer(%{c_vendor}/%{gh_project}) = %{version}
 Provides:  php-%{gh_project} = %{version}
