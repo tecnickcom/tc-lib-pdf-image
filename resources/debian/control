@@ -12,7 +12,7 @@ Vcs-Browser: https://github.com/~#VENDOR#~/~#PROJECT#~
 Package: ~#PKGNAME#~
 Provides: php-~#PROJECT#~
 Architecture: all
-Depends: php (>= 8.2.0), php-tecnickcom-tc-lib-file (<< 4.0.0), php-tecnickcom-tc-lib-file (>= 3.9.9), php-tecnickcom-tc-lib-pdf-encrypt (<< 3.0.0), php-tecnickcom-tc-lib-pdf-encrypt (>= 2.12.1), ${misc:Depends}
+Depends: php (>= 8.2.0), php-tecnickcom-tc-lib-file (<< 4.0.0), php-tecnickcom-tc-lib-file (>= 3.9.10), php-tecnickcom-tc-lib-pdf-encrypt (<< 3.0.0), php-tecnickcom-tc-lib-pdf-encrypt (>= 2.12.2), ${misc:Depends}
 Recommends: php-gd
 Description: PHP PDF Image Library
  PHP library containing PDF Image methods.
